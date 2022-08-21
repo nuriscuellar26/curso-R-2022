@@ -2,8 +2,7 @@
 
 \begin{document}
 
-\textbf{Ejemplo 1:}\\
-Se están estudiando tres procesos (A, B, C) para fabricar pilas o baterías. Se sospecha que el proceso incide en la duración (en semanas) de las baterías, es decir, que la duración (en semanas) de los procesos es diferente. Se seleccionan aleatoriamente cinco baterías de cada proceso y al medirles aleatoriamente su duración los datos que se obtienen, son los siguientes:
+\subseccion{\textbf{Ejemplo 1:}}\newline Se están estudiando tres procesos (A, B, C) para fabricar pilas o baterías. Se sospecha que el proceso incide en la duración (en semanas) de las baterías, es decir, que la duración (en semanas) de los procesos es diferente. Se seleccionan aleatoriamente cinco baterías de cada proceso y al medirles aleatoriamente su duración los datos que se obtienen son los siguientes:
 
 1) Activa tu directorio de trabajo.\\
 
@@ -60,7 +59,8 @@ search()
 9) Dibuja un gráfico horizontal de puntos para los tres procesos.
 <<>>=
 stripchart(Baterias, main="Gráfico de puntos para los tres procesos", method = "stack", 
-           vertical =FALSE, col="blue", pch=1, xlab="Duración (semanas)", ylab="Proceso")
+           vertical =FALSE, col="blue", pch=1, xlab="Duración (semanas)", 
+           ylab="Proceso")
 
 # Note que con ayuda de este gráfico podemos observar sí los tres procesos se comportan 
 #de manera distinta o parecida en cuanto a duración en semanas de las baterías.
@@ -79,11 +79,14 @@ summary(Baterias)
 <<>>=
 # Horizontal
 boxplot(Baterias, width=NULL, varwidth=TRUE, names, add= FALSE, horizontal = TRUE,
-        main="Gráfico de caja por proceso", border=par("fg"), col=c("yellow", "cyan", "red"), 
+        main="Gráfico de caja por proceso", border=par("fg"), 
+        col=c("yellow", "cyan", "red"), 
         xlab = "Duración (semanas)", ylab="Proceso")
+
 # Vertical
 boxplot(Baterias, width=NULL, varwidth=TRUE, names, add= FALSE, horizontal = FALSE,
-        main="Gráfico de caja por proceso", border=par("fg"), col=c("yellow", "cyan", "red"), 
+        main="Gráfico de caja por proceso", border=par("fg"), 
+        col=c("yellow", "cyan", "red"), 
         xlab = "Duración (semanas)", ylab="Proceso")
 @
 
@@ -96,6 +99,57 @@ S <- var(Baterias)
 S
 @
 
+13) Presenta la desviación estándar de cada proceso.
+<<>>=
+#desv <- sd(Baterias)
+#desv
+@
+
+14) Realiza un análisis de varianza de una vía, para probar la hipótesis nula de que el proceso no influye en la duración de las baterías, es decir, que no hay diferencias entre los tres procesos.\newline
+$H_{0}:\mu_{A}=\mu_{B}=\mu_{C}$ , no existe diferencias entre los tres procesos.\newline
+$H_{a}:\mu_{1}\ne\mu_{2}$, por lo menos un par $i\ne j$, de procesos difieren en la duración de las baterías.
+
+<<>>=
+# Concatena los tres vectores dentro de un vector simple, junto con un vector factor 
+#indicador de la categoría o tratamiento (A, B, C) que origina cada observación. 
+#El resultado es un data.frame que tiene como componentes los dos vectores anteriores.
+
+Baterias <- stack(Baterias)
+Baterias
+names(Baterias) # Muestra los encabezados de los vectores
+
+# Prueba de igualdad de medias por descomposición de la varianza en dos fuentes de variación:
+#la variabilidad que hay entre los grupos (debida a la variable independiente o los 
+#tratamientos), y la variabilidad que existe dentro de cada grupo (variabilidad no 
+#explicada por los tratamientos).
+
+aov.Baterias <- aov(values~ind, data=Baterias)
+
+# values~ind relaciona los valores muestrales con los respectivos grupos
+
+summary(aov.Baterias)
+# Note que es necesario la instrucción anterior para poder visualizar la tabla ANOVA
+
+# Prueba de igualdad de medias en un diseño de una vía (o unifactorial) asumiendo que las
+#varianzas de los grupos son iguales
+oneway.test(values~ind, data=Baterias, var.equal = TRUE)
+@
+
+\textbf{Decisión: ya que $\alpha = 0.05 > p-value$ obtenido, entonces se rechaza $H_{0}$} \\
+
+15) Deshace la concatenación del vector de valores y el vector indicador de categoría.
+<<>>=
+Baterias = unstack(Baterias)
+Baterias
+@
+
+
+16) Desconecta la hoja de datos de la segunda ruta o lista de búsqueda.
+<<>>=
+detach(Baterias, pos=2)
+search()
+@
 
 
 \end{document}
+

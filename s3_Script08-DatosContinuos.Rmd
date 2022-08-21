@@ -175,7 +175,8 @@ lines(limites, Fia, col="black", type="l")
 options(digits=4)
 for(i in 1:k) if (fi[i] == max(fi)) break()
 if(i > 1) moda <- limites[i]+((fi[i]-fi[i-1])/((fi[i]-fi[i-1])+(fi[i]-fi[i+1]) ))*a else 
-  moda <- limites[i]+(fi[i]/(fi[i]+(fi[i]-fi[i+1])))*a
+moda <- limites[i]+(fi[i]/(fi[i]+(fi[i]-fi[i+1])))*a
+
 moda
 
 # Calcula los cuartiles: Q1, Q2, Q3
@@ -188,7 +189,13 @@ break
 Q
 
 # Calcula los principales estadísticos.
-estadisticos <- rbind(media=sum(tablefrec$cifi)/n, moda=moda, Q1=Q[1], Q2=Q[2], Q3=Q[3],rango=max(x)-min(x), varianza=sum(tablefrec$ciMedia2fi)/n,Desviacion=sqrt(sum(tablefrec$ciMedia2fi)/n), CoeficienteVariacion=sqrt(sum(tablefrec$ciMedia2fi)/n)/(sum(tablefrec$cifi)/n), CAfisher=(sum(tablefrec$ciMedia3fi)/n)/sqrt(sum(tablefrec$ciMedia2fi)/n)^3, CoeficienteCurtosis=((sum(tablefrec$ciMedia4fi)/n)/sqrt(sum(tablefrec$ciMedia2fi)/n)^4)-3)
+estadisticos <- rbind(media=sum(tablefrec$cifi)/n, moda=moda, Q1=Q[1], Q2=Q[2], Q3=Q[3],rango=max(x)-min(x),varianza=sum(tablefrec$ciMedia2fi)/n,
+              Desviacion=sqrt(sum(tablefrec$ciMedia2fi)/n),
+              CoeficienteVariacion=sqrt(sum(tablefrec$ciMedia2fi)/n)/
+                (sum(tablefrec$cifi)/n),CAfisher=(sum(tablefrec$ciMedia3fi)/n)
+                /sqrt(sum(tablefrec$ciMedia2fi)/n)^3,
+              CoeficienteCurtosis=((sum(tablefrec$ciMedia4fi)/n)/sqrt(sum
+                (tablefrec$ciMedia2fi)/n)^4)-3)
 estadisticos
 ```
 
