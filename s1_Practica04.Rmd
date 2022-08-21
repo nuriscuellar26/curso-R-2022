@@ -53,7 +53,8 @@ La función scan() es más flexible que read.table() y permite realizar lecturas
 
 * Ejemplo 1: Leer sólo las dos primeros objetos o columnas del archivo "datos01.txt"
 ```{r}
-Edat1 <- scan("datos01.txt", list(X1=0, X2=0), skip = 1, flush = TRUE, quiet = TRUE);Edat1
+Edat1 <- scan("datos01.txt", list(X1=0, X2=0), skip = 1, flush = TRUE, quiet = TRUE)
+Edat1
 
 # Observe que en list(X1=0, X2=0) se les da el nombre a las dos primeras columnas o variables (puede darle el nombre que crea más conveniente) y se indica que son variables numéricas; sin embargo, del archivo únicamente se leen las dos primeras columnas, si se quisiera leer las columnas primera y tercera, nos veríamos obligados a leer las tres primeras.
 
@@ -84,7 +85,7 @@ Observe que debe guardar la hoja Excel en su directorio de trabajo y que el arch
 2) Regresar al entorno de R y recuperar el archivo "HojaE1.csv".
 ```{r}
 hojaR <- read.csv("HojaE1.csv", sep = ";", strip.white = TRUE)
-hojaR
+View(hojaR)
 ```
 
 Note que R ha reemplazado “–“ en los encabezados de las columnas por “.”; en general reemplazará cualquier carácter.
