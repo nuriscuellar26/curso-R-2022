@@ -1,0 +1,32 @@
+\documentclass{article}
+
+\begin{document}
+
+\textbf{Ejemplo 1:}\\
+Se están estudiando tres procesos (A, B, C) para fabricar pilas o baterías. Se sospecha que el proceso incide en la duración (en semanas) de las baterías, es decir, que la duración (en semanas) de los procesos es diferente. Se seleccionan aleatoriamente cinco baterías de cada proceso y al medirles aleatoriamente su duración los datos que se obtienen, son los siguientes:
+
+1) Activa tu directorio de trabajo.\\
+
+2) Crea un nuevo script y llámale "Script10-DatosBivariados2"\\
+
+3) Crea un vector de datos para cada proceso descrito en el problema.
+<<>>=
+a <- c(100,96,92,96,92)
+b <- c(76,80,75,84,82)
+c <- c(108,100,96,98,100)
+
+a;b;c
+@
+
+
+4) Crea una hoja de datos teniendo como componentes (columnas) los tres vectores (se puede hacer pues el número de datos en cada proceso es igual, de lo contrario se debería de crear dos variables una para la duración de cada proceso y otra para identificar a qué proceso corresponde).
+<<>>=
+baterias <- data.frame(procesoA=a, procesoB=b, procesoC=c)
+baterias
+# Para editar los datos puede utilizar la función fix()
+fix(baterias)
+@
+
+
+
+\end{document}
