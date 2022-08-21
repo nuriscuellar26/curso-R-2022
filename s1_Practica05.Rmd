@@ -1,0 +1,155 @@
+---
+title: 'UNIDAD 1: Práctica 05-Estructuras de control y definición de función en R.'
+author: "Abigail Ramos"
+output: pdf_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+R es un lenguaje de expresiones, en el sentido de que el único tipo de orden que posee es una función o expresión que devuelve un resultado. Incluso una asignación es una expresión, cuyo resultado es el valor asignado y que puede utilizarse en cualquier sitio en que pueda utilizarse una expresión.
+
+Las órdenes pueden agruparse entre llaves, {expr_1;. . .; expr_m}, en cuyo caso el valor del grupo es el resultado de la última expresión del grupo que se haya evaluado. Puesto que un grupo es por sí mismo una expresión, puede incluirse entre paréntesis y ser utilizado como parte de una expresión mayor. Este proceso puede repetirse si se considera necesario. 
+
+Las estructuras de control en R son muy similares a las de cualquier lenguaje de programación.
+
+# 1. ESTRUCTURA CONDICIONAL: LA ORDEN IF() Y IFELSE().
+
+La construcción condicional if(), la cual es la más fácil de utilizar tiene alguna de las siguientes
+
+* if(condicion) expr
+* if(condicion) expresion1 else expresion2
+
+Si la expresion1 ó expresion2 son complejas, esto es, tienen más de un comando entonces deben encerrarse entre llaves {...}
+
+A menudo suelen utilizarse los operadores && (AND) y || (OR) en una condicion. En tanto que & y | se aplican a todos los elementos de un vector, && y || se aplican a vectores de longitud uno y sólo evalúan el segundo argumento si es necesario, esto es, si el valor de la condicion completa no se deduce del primer argumento.
+
+**Ejemplo 1:**
+```{r}
+x<-1
+if(x>0) 
+y<-1 else y<-0 
+#le asigna a la variable "y" un valor de 1 si x es mayor que 0, en caso contrario le asigna el valor 0.
+```
+
+ifelse(prueba, si, no)
+Donde:
+* prueba: Es un vector lógico o condición lógica a ser evaluada.
+* si: devuelve valores para los elementos ciertos de "prueba".
+* no: devuelve valores para los elementos falsos de "prueba".
+
+El uso de if() está limitado a expresiones que no sean vectores. Si estamos evaluando vectores o matrices entonces lo indicado es hacerlo con ifelse() que devuelve un valor con la misma forma que el argumento "prueba" el cual es llenado con elementos seleccionados bien sea del argumento "si" o del argumento "no" dependiendo de si el elemento de "prueba" es "TRUE" O "FALSE", si los argumentos "si" o "no" son muy cortos, entonces sus elementos son reciclados
+
+Por ejemplo, ejecute las siguientes instrucciones
+```{r}
+x <- c(6:-4)
+x
+sqrt(x) # Produce un mensaje de advertencia
+sqrt(ifelse(x >= 0, x, NA)) # No produce advertencia
+ifelse(x >= 0, sqrt(x), NA) # Produce un mensaje de advertencia
+# Comente las diferencias entre cada una de las instrucciones anteriores.
+```
+
+# 2. ESTRUCTURAS ITERATIVAS O DE REPETICIÓN: FOR(), WHILE() Y REPEAT().
+
+La función for() es una construcción repetitiva que tiene la forma:
+
+for(nombre in expr1) expr2
+
+Donde nombre es la variable de control del número de iteraciones, expr1 es un vector (a menudo de la forma m:n), y expr2 es una expresión, a menudo agrupada, en cuyas sub-expresiones puede aparecer la variable de control, expr2 se evalúa repetidamente conforme nombre recorre los valores del vector expr1.
+
+**Ejemplo:**
+```{r}
+x <- c(2, 6, 4, 7, 5, 1)
+suma<-0
+for(i in 1:3) suma = suma+x[i]
+suma
+```
+
+**Nota:** En R, la función for() se utiliza mucho menos que en lenguajes tradicionales, ya que no aprovecha las estructuras de los objetos. El código que trabaja directamente con las estructuras completas suele ser más claro y más rápido.
+
+Otras estructuras de repetición son:
+* while (condición) expresión
+* repeat expresión
+
+La función break() se utiliza para terminar cualquier ciclo. Esta es la única forma (salvo que se produzca un error) de finalizar un ciclo repeat. La función next() deja de ejecutar el resto de un ciclo y pasa a ejecutar el siguiente.
+
+# 3. FUNCIONES ESCRITAS POR EL USUARIO.
+
+El lenguaje R permite al usuario definir objetos que sean funciones. Éstas se convierten en auténticas funciones de R, que se almacenan en una forma interna y se pueden utilizar en expresiones futuras. Una función en R se puede delinear de la siguiente manera:
+
+**Ejemplo 1:** Definir en R la función cuadrática $y = f(x) = 3x^2-5x+2$
+
+Como nombre de la función podemos usar cualquier palabra (que no sea una palabra reservada por R, como log o sum) que puede incluir letras y puntos.
+
+Llamémosle func.cuadratica y definámosla de la manera siguiente:
+```{r}
+func.cuadratica <- function(x)
+{
+3*x^2-5*x+2
+}
+```
+
+Luego, si queremos calcular f(2) simplemente ejecutamos la instrucción:
+```{r}
+y <- func.cuadratica(2)
+y
+```
+
+NOTA: Toda función para usarla debe estar cargada en el área de trabajo (Workspace). Es decir, primero es necesario correr el código necesario el código de la función y asegurarse que no contenga errores de sintaxis.
+
+**Ejemplo 2:** Se quiere definir una función para calcular la media de un vector de datos. Una definición podría ser:
+```{r}
+media <- function(x)
+{
+n = length(x)
+suma <- 0.0
+for(i in 1:n) suma = suma + x[i]
+media = suma/n
+}
+```
+
+Guarde este objeto en su directorio de trabajo con la instrucción
+```{r}
+save(media, file= "media.RData")
+```
+
+Borre todos los objetos del área de trabajo con
+```{r}
+rm(list=ls(all=TRUE))
+```
+
+Cargue el objeto con
+```{r}
+load("media.RData")
+```
+
+Pruebe la función media() con los siguientes vectores:
+```{r}
+x <- 1:5
+(media(x)) #(se usa doble paréntesis para que muestre el resultado en pantalla)
+y <- c(5, NA , 4, 9)
+(media(y)) #(el resultado no puede calcularse pues falta un dato)
+```
+
+Note que al escribir (media), nos muestra el código de la función.
+
+Observe el problema que se da en el cálculo de la media, debido a los datos omitidos o perdidos, qué propone usted para solucionar esto.
+
+**Ejemplo 3:** Se quiere definir una función para graficar la función seno de x. Una definición de esta función puede ser
+```{r}
+Seno <- function(x)
+{
+y = sin(x)
+plot(x, y, main="Ejemplo de gráficos en R",
+xlab="x", ylab="y = Seno(x)", col="blue", pch=1)
+}
+```
+
+Pruebe la función con el siguiente vector:  
+
+```{r}
+x<-seq(-pi, pi, len=100)
+Seno(x)
+```  

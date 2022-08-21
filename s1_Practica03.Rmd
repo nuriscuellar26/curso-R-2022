@@ -1,0 +1,232 @@
+---
+title: 'UNIDAD 1: Práctica 03 - Tipos de objetos: factores, listas y hojas de datos,
+  operadores y  funciones que operan sobre ellos.'
+author: "Abigail Ramos"
+output: pdf_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+# 1. FACTORES NOMINALES Y ORDINALES.
+
+## FACTORES NOMINALES.
+
+* Ejemplo 1: Variables sexo (categórica) y edad en una muestra de 7 alumnos del curso.
+```{r}
+# Supongamos que se obtuvieron los siguientes datos:
+
+sexo <- c("M", "F", "F", "M", "F", "F", "M")
+sexo
+edad <- c(19, 20, 19, 22, 20, 21, 19)
+edad
+
+# Podemos construir un factor con los niveles o categorias de sexo
+
+FactorSexo = factor(sexo)
+FactorSexo
+
+# Se pueden ver los niveles o categorías del factor con: levels(FactorSexo)
+# Crear una tabla que contenga la media muestral por categoría de sexo (nivel del factor):
+
+mediaEdad <- tapply(edad, FactorSexo, mean)
+mediaEdad
+
+# Note que el primer argumento debe ser un vector, que es del cual se encontrarán las medidas de resumen; el segundo es el factor que se está considerando, mientras que en el tercero se especifica la medida de interés, solamente puede hacerse una medida a la vez. ¿Qué tipo de objeto es la variable mediaEdad?: 
+
+is.vector(mediaEdad)
+is.matrix(mediaEdad)
+is.list(mediaEdad)
+is.table(mediaEdad)
+is.array(mediaEdad)
+```
+Es de tipo array
+
+## FACTORES ORDINALES
+
+Los niveles de los factores se almacenan en orden alfabético, o en el orden en que se especificaron en la función factor() si ello se hizo explícitamente.
+
+A veces existe una ordenación natural en los niveles de un factor, orden que deseamos tener en cuenta en los análisis estadísticos. La función ordered() crea este tipo de factores y su uso es idéntico al de la función factor(). Los factores creados por la función factor() los denominaremos nominales o simplemente factores cuando no haya lugar a confusión, y los creados por la función ordered() los denominaremos ordinales. En la mayoría de los casos la única diferencia entre ambos tipos de factores consiste en que los ordinales se imprimen indicando el orden de los niveles. Sin embargo, los contrastes generados por los dos tipos de factores al ajustar Modelos lineales, son diferentes.
+
+# 2. CREACIÓN Y MANEJO DE LISTAS.
+
+Una lista es un objeto que contiene una colección ordenada de objetos de diferente tipo (vector, matriz, arreglo, función, o lista), conocidos como componentes. Se construye con la función list(), que tiene la forma general siguiente:
+
+**Lista <- list(nombre1 = objeto1, nombre2 = objeto2, ..., nombren = objeton)**
+
+Si omite los nombres, las componentes sólo estarán numeradas.
+Las componentes pueden accederse por su número o posición, ya que siempre están numeradas, o también pueden referirse por su nombre, si lo tienen.
+
+* Ejemplo 1: Crear una Lista con cuatro componentes.
+```{r}
+lista1<-list(padre="Pedro", madre="María", no.hijos=3, edad.hijos=c(4,7,9))
+lista1
+```
+
+```{r}
+is.matrix(lista1)
+is.vector(lista1$edad.hijos)
+```
+
+* Ejemplo 2: Acceso a las componentes de una lista:
+```{r}
+lista1[1] # accede a la componente como una lista (con etiqueta y valor)
+lista1["padre"] # el acceso es igual que con lista1[1]
+lista1[[2]] # accede al valor o valores de la componente segunda pero no muestra el nombre de la componente.
+lista1["madre"] # el acceso es igual que con lista1[[1]]
+```
+
+* Ejemplo 3: Acceso a los elementos de la cuarta componente:
+```{r}
+lista1[[4]][2] #(se indica el elemento a ingresar en el segundo corchete)
+```
+
+* Ejemplo 4: Acceso de las componentes de una lista por su nombre:
+```{r}
+lista1$padre #similar a
+lista1["padre"]
+```
+
+Forma general: **Nombre_de_lista$nombre_de_componente**
+Por ejemplo:
+```{r}
+lista1$padre #equivale a 
+lista1[[1]]
+lista1$edad.hijos[2] #equivale a 
+lista1[[4]][2]
+```
+
+* Ejemplo 5: Utilizar el nombre de la componente como índice:
+```{r}
+lista1[["nombre"]] #se puede ver que equivale a 
+lista1$nombre
+#También es útil la forma: 
+x <- "nombre"; lista1[x]
+```
+
+* Ejemplo 6: Creación de una sublista de una lista existente:
+```{r}
+subLista <- lista1[4]
+subLista
+```
+
+* Ejemplo 7: Ampliación de una lista: por ejemplo, la lista lista1 tiene 4 componentes y se le puede agregár una quinta componente con:
+```{r}
+lista1[5] <- list(sexo.hijos=c("F", "M", "F"))
+lista1
+```
+
+Observe que no aparece el nombre del objeto agregado, pero usted puede modificar la estructura de la lista lista1 con:
+```{r}
+lista1 <- edit(lista1)
+```
+
+Nota: Se puede aplicar la función data.entry() para modificar la estructura de una lista.
+
+* Ejemplo 8: Funciones que devuelven una lista.
+Las funciones y expresiones de R devuelven un objeto como resultado, por tanto, si deben devolver varios objetos, previsiblemente de diferentes tipos, la forma usual es una lista con nombres. Por ejemplo, la función eigen() que calcula los autovalores y autovectores de una matriz simétrica.
+
+Ejecute las siguientes instrucciones:
+```{r}
+S <- matrix(c(3, -sqrt(2), -sqrt(2), 2), nrow=2, ncol=2)
+S
+autovS <- eigen(S)
+autovS
+```
+
+Si quisiéramos almacenar sólo los autovalores de S, podemos hacer lo siguiente:
+```{r}
+evals <- eigen(S)$values
+evals
+```
+
+* Ejemplo 9: Crear una matriz dando nombres a las filas y columnas
+```{r}
+Notas <- matrix(c(2, 5, 7, 6, 8, 2, 4, 9, 10), ncol=3, dimnames=list(c("Matemática","Álgebra","Geometría"),
+c("Juan","José","René")))
+Notas
+# Los nombres se dan primero para filas y luego para columnas.
+```
+
+# 3. CREACIÓN Y MANEJO DE HOJAS DE DATOS (DATA FRAME).
+
+* Ejemplo 1: Creación de un data frame teniendo como columnas tres vectores:
+**En primer lugar generamos los tres vectores**
+El primer vector tendrá 20 elementos que se obtienen con reemplazamiento de una muestra aleatoria de valores lógicos.
+```{r}
+log <- sample(c(TRUE, FALSE), size = 20, replace = T)
+log
+# Note que puede usar T en lugar de TRUE y F en lugar de FALSE.
+```
+
+El segundo vector tendrá 20 elementos de valores complejos cuya parte real proviene de una distribución Normal estándar y cuya parte imaginaria lo hace de una distribución Uniforme(0,1)
+```{r}
+comp <- rnorm(20) + runif(20) * (1i)
+comp
+```
+
+El tercer vector tendrá 20 elementos de una distribución Normal estándar
+```{r}
+num <- rnorm(20, mean=0, sd=1)
+num
+```
+
+Crear un data frame compuesto por los tres vectores anteriores
+```{r}
+df1 <- data.frame(log, comp, num)
+df1
+```
+
+Crear un vector de nombres de los tres vectores anteriores
+```{r}
+nombres <- c("logico", "complejo", "numerico")
+```
+
+Define los nombres de las columnas del data frame asignándoles el vector nombres
+```{r}
+names(df1) <- nombres
+df1
+```
+
+Define los nombres de las filas del data frame asignándoles un vector de 20 elementos correspondientes a las 20 primeras letras del abecedario
+```{r}
+row.names(df1) <- letters[1:20]
+df1
+```
+
+* Ejemplo 2: Vamos a crear la siguiente hoja de datos que tiene 4 variables o columnas:
+```{r}
+edad <- c(18, 21, 45, 54)
+edad
+datos <- matrix(c(150, 160, 180, 205, 65, 68, 65, 69), ncol=2, dimnames=list(c(), c("Estatura","Peso")))
+datos
+sexo <- c("F", "M", "M", "M")
+sexo
+hoja1 <- data.frame(c(Edad=edad, datos, Sexo=sexo))
+hoja1
+#Para editar o agregar datos, o componentes utilice: fix(hoja1)
+```
+Nota: Puede forzar que una lista, cuyos componentes cumplan las restricciones para ser una hoja de datos, realmente lo sea, mediante la función as.data.frame()
+
+
+**Conexión de listas o hojas de datos.**
+
+La función search() busca y presenta qué hojas de datos, listas o bibliotecas han sido conectadas o desconectadas. Teclee search()
+```{r}
+search()
+```
+
+La función attach() es la función que permite conectar en la trayectoria de búsqueda no sólo directorios, listas y hojas de datos, sino también otros tipos de objetos. Teclee attach(hoja1) y luego search()
+```{r}
+attach(hoja1)
+search()
+```
+
+
+Luego puede acceder a las componentes por su nombre:
+```{r}
+#hoja1$Peso <- Peso+1; hoja1
+```
+
+Posteriormente podrá desconectar el objeto utilizando la función detach(), utilizando como argumento el número de posición o, preferiblemente, su nombre. Teclee detach(hoja1) y compruebe que la hoja de datos ha sido eliminada de la trayectoria de búsqueda con search().
