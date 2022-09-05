@@ -71,11 +71,9 @@ El procedimiento para generar un diagrama de pastel es muy similar al utilizado 
 gráficas de barras. En el Menú Gráficas seleccionamos la opción Gráfica de sectores, posteriormente
 solamente debe especificarse la variable de la cual se desea obtener el gráfico.
 
-
 ```{r}
 library(colorspace, pos=18)
 ```
-
 
 ```{r}
 with(consumo, piechart(PC, xlab="", ylab="", main="PC", col=rainbow_hcl(3), 
