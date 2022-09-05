@@ -38,8 +38,11 @@ Entrada1
 NOTA: La función read.table() lee los datos y los almacena en una hoja de datos (data.frame), si quiere hacer operaciones debe conectar esta hoja a la trayectoria de búsqueda.
 
 6) Leer los datos contenidos en el archivo “mexico.dat”
+```{r}
+Mexico <- read.table("mexico.dat")
+Mexico
+```
 
-Mexico <- read.table("mexico.dat");Mexico
 Note que la instrucción header=T es por defecto y puede omitirla (R reconocerá siempre que en la primera línea se encuentran los nombres de las variables).
 
 La sintaxis completa de la función read.table() es
@@ -163,8 +166,4 @@ library(foreign)
 read.spss('demo.sav', use.value.labels=TRUE, max.value.label=Inf, to.data.frame=T)
 ```
 
-
-
-
 - Realizar los análisis o cálculos correspondientes.
-
