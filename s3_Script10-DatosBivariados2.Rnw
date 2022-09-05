@@ -10,25 +10,25 @@
 
 3) Crea un vector de datos para cada proceso descrito en el problema.
 <<>>=
-a <- c(100,96,92,96,92)
-b <- c(76,80,75,84,82)
-c <- c(108,100,96,98,100)
+A <- c(100,96,92,96,92)
+B <- c(76,80,75,84,82)
+C <- c(108,100,96,98,100)
 
-a;b;c
+A;B;C
 @
 
 
 4) Crea una hoja de datos teniendo como componentes (columnas) los tres vectores (se puede hacer pues el número de datos en cada proceso es igual, de lo contrario se debería de crear dos variables una para la duración de cada proceso y otra para identificar a qué proceso corresponde).
 <<>>=
-baterias <- data.frame(procesoA=a, procesoB=b, procesoC=c)
-baterias
+Baterias <- data.frame(procesoA=A, procesoB=B, procesoC=C)
+Baterias
 # Para editar los datos puede utilizar la función fix()
 fix(baterias)
 @
 
 5) Guarda la hoja de datos en un archivo.
 <<>>=
-write.table(baterias, file="Baterias.txt", append=FALSE, quote=TRUE, sep=" ", 
+write.table(Baterias, file="Baterias.txt", append=FALSE, quote=TRUE, sep=" ", 
             na="NA", col.names=TRUE)
 @
 
@@ -40,13 +40,11 @@ ls()
 @
 
 
-
 7) Recupera la hoja de datos, para probar si fue guardada.
 <<>>=
 Baterias <- read.table("Baterias.txt", header=TRUE) 
 Baterias
 @
-
 
 
 8) Conecta o adjunta la hoja de datos a la segunda ruta o lista de búsqueda.
@@ -67,12 +65,10 @@ stripchart(Baterias, main="Gráfico de puntos para los tres procesos", method = 
 @
 
 
-
 10) Muestra un resumen estadístico para los tres procesos.
 <<>>=
 summary(Baterias)
 @
-
 
 
 11) Dibuja un gráfico de cajas (box-plot) para los tres procesos.
@@ -101,8 +97,8 @@ S
 
 13) Presenta la desviación estándar de cada proceso.
 <<>>=
-#desv <- sd(Baterias)
-#desv
+desv <- sd(Baterias)
+desv
 @
 
 14) Realiza un análisis de varianza de una vía, para probar la hipótesis nula de que el proceso no influye en la duración de las baterías, es decir, que no hay diferencias entre los tres procesos.\newline
