@@ -1,0 +1,47 @@
+<!-- R Commander Markdown Template -->
+
+Replace with Main Title
+=======================
+
+### Your Name
+
+### `r as.character(Sys.Date())`
+
+```{r echo=FALSE}
+# include this code chunk as-is to set options
+knitr::opts_chunk$set(comment=NA, prompt=TRUE, out.width=750, fig.height=8, fig.width=8)
+library(Rcmdr)
+library(car)
+library(RcmdrMisc)
+```
+
+
+```{r echo=FALSE}
+# include this code chunk as-is to enable 3D graphs
+library(rgl)
+knitr::knit_hooks$set(webgl = hook_webgl)
+```
+
+**1. USO DE LA FUNCIÓN READ.TABLE().**
+
+Leeremos los datos contenidos en el archivo "datos01.txt" (el procedimiento para el archivo “datos01.dat" es similar).
+```{r}
+Datos01 <- read.table("C:/Users/abbyc/Desktop/Ciclo II 2022/An?lisis estad?stico con R/curso-R-2022/datos01.txt", header=TRUE, stringsAsFactors=TRUE, sep="", 
+  na.strings="NA", dec=".", strip.white=TRUE)
+```
+
+**2. IMPORTANDO DATOS DE EXCEL.**
+
+Si por el contrario los datos a los cuales deseamos realizar el análisis estadístico se encuentran en formato XLS (versión 2003 de Microsoft Excel), debemos de seguir los siguientes pasos (Ilustraremos el procedimiento con el archivo “contaminación_mexico.xls”):
+```{r}
+contam_mex <- readXL("C:/Users/abbyc/Desktop/Ciclo II 2022/An?lisis estad?stico con R/curso-R-2022/contaminacion_mexico.xls", rownames=FALSE, header=TRUE, 
+  na="", sheet="contaminacion_mexico", stringsAsFactors=TRUE)
+```
+
+**3. IMPORTAR DATOS DE SPSS HACIA R.**
+
+A parte de leer archivos en formato texto y delimitados por comillas, R permite leer datos en una gran variedad de formato entre ellos se encuentra archivos el formato de SPSS “.sav”.
+```{r}
+Demo <- readSPSS("C:/Users/abbyc/Desktop/Ciclo II 2022/An?lisis estad?stico con R/curso-R-2022/demo.sav", rownames=FALSE, stringsAsFactors=TRUE, tolower=FALSE)
+```
+
