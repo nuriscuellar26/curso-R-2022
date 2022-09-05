@@ -189,7 +189,8 @@ break
 Q
 
 # Calcula los principales estadísticos.
-estadisticos <- rbind(media=sum(tablefrec$cifi)/n, moda=moda, Q1=Q[1], Q2=Q[2], Q3=Q[3],rango=max(x)-min(x),varianza=sum(tablefrec$ciMedia2fi)/n,
+estadisticos <- rbind(media=sum(tablefrec$cifi)/n, moda=moda, Q1=Q[1], Q2=Q[2], 
+              Q3=Q[3],rango=max(x)-min(x),varianza=sum(tablefrec$ciMedia2fi)/n,
               Desviacion=sqrt(sum(tablefrec$ciMedia2fi)/n),
               CoeficienteVariacion=sqrt(sum(tablefrec$ciMedia2fi)/n)/
                 (sum(tablefrec$cifi)/n),CAfisher=(sum(tablefrec$ciMedia3fi)/n)
