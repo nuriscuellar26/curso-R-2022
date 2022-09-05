@@ -1,0 +1,84 @@
+<!-- R Commander Markdown Template -->
+
+Replace with Main Title
+=======================
+
+### Your Name
+
+### `r as.character(Sys.Date())`
+
+```{r echo=FALSE}
+# include this code chunk as-is to set options
+knitr::opts_chunk$set(comment=NA, prompt=TRUE, out.width=750, fig.height=8, fig.width=8)
+library(Rcmdr)
+library(car)
+library(RcmdrMisc)
+```
+
+```{r echo=FALSE}
+# include this code chunk as-is to enable 3D graphs
+library(rgl)
+knitr::knit_hooks$set(webgl = hook_webgl)
+```
+
+**1. ANÍLISIS ESTAD?STICO DE DATOS CATEGÓRICOS.**
+Ejemplo: Se realiza un estudio para conocer las preferencias sobre el tipo de gaseosa que se consume: "CC"=Coca Cola, "PC"=Pepsi Cola, "SC"=Salva Cola, para ello se toma una muestra
+aleatoria de 20 personas.
+
+1) Leer o recuperar el vector de datos o archivo de texto.
+
+El procedimiento para importar datos es como se coment? en la práctica 4, indicamos ?nicamente
+las opciones que deben especificarse para la lectura del archivo Consumo.txt. Nos vamos al
+Menú Datos, y dentro de éste, elegimos el Sub Men? Importar datos, finalmente se elige desde
+archivo de texto
+
+```{r}
+consumo <- 
+  read.table("C:/Users/abbyc/Desktop/Ciclo II 2022/An?lisis estad?stico con R/curso-R-2022/Consumo.txt",
+   header=TRUE, stringsAsFactors=TRUE, sep="", na.strings="NA", dec=".", 
+  strip.white=TRUE)
+```
+
+2) Crear la tabla de distribución de frecuencias
+
+Solamente podemos calcular tablas de distribución de frecuencia desde la interfaz gráfica del R. El
+procedimiento es el siguiente: en el Menú Estadísticos, elegimos el sub menú Resúmenes y dentro
+de éste se elige Conjunto de datos activos, obteniendo el mismo resultado que con la instrucción
+table() 
+
+
+```{r}
+summary(consumo)
+```
+
+3) Realizar un gráfico de barras
+
+Para realizar los diagramas de barras el procedimiento es el siguiente: en el Menú Gráficas
+elegimos la opción Gráfica de barras, posteriormente nos aparece un cuadro de dialogo en el que
+nos pide introduzcamos la variable de la cual deseamos generar el gráfico (en el caso de que exista
+más de una).
+
+
+```{r}
+with(consumo, Barplot(PC, xlab="PC", ylab="Frequency", label.bars=TRUE))
+```
+Note que solamente se genera el gráfico, no coloca ningún título y los colores se asignan por
+defecto, si queremos especificarlo tendr?an que usar el código correspondiente. 
+
+4) Realizar un gráfico de pastel
+
+El procedimiento para generar un diagrama de pastel es muy similar al utilizado para generar las
+gráficas de barras. En el Menú Gráficas seleccionamos la opción Gráfica de sectores, posteriormente
+solamente debe especificarse la variable de la cual se desea obtener el gráfico.
+
+
+```{r}
+library(colorspace, pos=18)
+```
+
+
+```{r}
+with(consumo, piechart(PC, xlab="", ylab="", main="PC", col=rainbow_hcl(3), 
+  scale="percent"))
+```
+
