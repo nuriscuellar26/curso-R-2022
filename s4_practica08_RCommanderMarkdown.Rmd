@@ -1,0 +1,61 @@
+<!-- R Commander Markdown Template -->
+
+Replace with Main Title
+=======================
+
+### Your Name
+
+### `r as.character(Sys.Date())`
+
+```{r echo=FALSE}
+# include this code chunk as-is to set options
+knitr::opts_chunk$set(comment=NA, prompt=TRUE, out.width=750, fig.height=8, fig.width=8)
+library(Rcmdr)
+library(car)
+library(RcmdrMisc)
+```
+
+
+```{r echo=FALSE}
+# include this code chunk as-is to enable 3D graphs
+library(rgl)
+knitr::knit_hooks$set(webgl = hook_webgl)
+```
+
+1) Visualiza el directorio por defecto y activa su directorio de trabajo
+
+2) Cargando el conjunto de datos al espacio de trabajo.
+Para poder cargar los datos al área de trabajo y poder trabajar con ellos y realizar cualquier análisis estadístico desde R-Commander, el procedimiento sería el siguiente: en el Menú Datos, se elige la opción Conjunto de datos en paquetes, el Menú desplegable que se muestra al elegir Leer conjunto de datos
+```{r}
+data(cancer, package="survival")
+```
+
+3) Crea el histograma de frecuencias
+Para crear un histograma de la variable “age”, el procedimiento es el siguiente: En el Menú Gráficas seleccionamos la opción Histograma,
+```{r}
+with(cancer, Hist(age, scale="frequency", breaks="Sturges", col="darkgray"))
+```
+
+4) Calcula los principales estadísticos descriptivos de la variable
+Para obtener un resumen de los principales estadísticos de la variable “age”, el procedimiento a seguir es el siguiente; en el Menú Estadísticos elegimos la opción Resúmenes, y dentro del sub Menú que se muestra dar clic en Resúmenes numéricos, tal y como se muestra en la figura siguiente. Note que al elegir la opción Conjunto de datos activo, nos mostrarán los principales estadísticos de todas las variables en el conjunto de datos.
+```{r}
+library(abind, pos=19)
+```
+
+
+```{r}
+library(e1071, pos=20)
+```
+
+
+```{r}
+numSummary(cancer[,"age", drop=FALSE], statistics=c("mean", "sd", "IQR", 
+  "quantiles"), quantiles=c(0,.25,.5,.75,1))
+```
+
+5) Otros gráficos (Diagramas de cajas).
+Finalmente si lo que deseamos es obtener los diagramas de cajas, el procedimiento es el siguiente. En el Menú Gráficas seleccionamos la opción Diagrama de caja, y luego finalmente le indicamos a qué variable debe graficar, tal y como se muestra en la figura a la derecha.
+```{r}
+Boxplot( ~ age, data=cancer, id=list(method="y"))
+```
+

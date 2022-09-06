@@ -1,0 +1,146 @@
+<!-- R Commander Markdown Template -->
+
+Replace with Main Title
+=======================
+
+### Your Name
+
+### `r as.character(Sys.Date())`
+
+```{r echo=FALSE}
+# include this code chunk as-is to set options
+knitr::opts_chunk$set(comment=NA, prompt=TRUE, out.width=750, fig.height=8, fig.width=8)
+library(Rcmdr)
+library(car)
+library(RcmdrMisc)
+```
+
+
+```{r echo=FALSE}
+# include this code chunk as-is to enable 3D graphs
+library(rgl)
+knitr::knit_hooks$set(webgl = hook_webgl)
+```
+
+# 1. CUALITATIVA VR CUALITATIVA.
+
+1) Activa tu directorio de trabajo.
+
+2) Lectura del conjunto de datos.
+El procedimiento para cargar el conjunto de datos es el que se ha venido mencionando. Lo primero que debemos hacer es elegir la opción Importar datos del Menú Datos. y dentro de éste elegir la opción desde datos SPSS... tal y como se muestra en la figura. Debemos simplemente elegir el archivo demo.sav.
+```{r}
+Demo <- readSPSS("C:/Users/abbyc/Desktop/Ciclo II 2022/Análisis estadístico con R/curso-R-2022/demo.sav", 
+  rownames=FALSE, stringsAsFactors=TRUE, tolower=FALSE)
+```
+
+Se trabajará con la variable “marital”, que representa la situación marital de las personas (solamente se distinguen entre Casadas y no Casadas); y con la variable “inccat”, la cual representa la categoría del ingreso en miles de dólares.
+
+3) Crea una tabla de contigencia o de doble entrada.
+El procedimiento para realizar una tabla de contingencia en la interfaz gráfica es el siguiente: en Menú Estadísticos se elige la opción Tablas de contingencia, y dentro de este se selecciona Tabla de doble entrada.
+```{r}
+library(abind, pos=17)
+```
+
+
+```{r}
+local({
+  .Table <- xtabs(~marital+inccat, data=Demo)
+  cat("\nFrequency table:\n")
+  print(.Table)
+  .Test <- chisq.test(.Table, correct=FALSE)
+  print(.Test)
+})
+```
+
+Al realizar el procedimiento descrito anteriormente deberá aparecernos el cuadro de dialogo que se muestra en la figura de la derecha. En el solamente debemos seleccionar las dos variables que se desean analizar; note además que en el mismo cuadro presenta la opción de mostrar la tabla de contingencia con totales por fila, por columna o totales generales. Y además permite elegir el contraste Chi-Cuadrado de independencia.
+
+# 2. CUALITATIVA VR CUANTITATIVA.
+
+Para ilustrar como realizar un análisis estadístico bidimensional entre una variable cualitativa y una cuantitativa se trabajará con la variable “marital”, que representa la situación marital de las personas (solamente se distinguen entre Casadas y no Casadas); y con la variable “income”, la cual representa el ingreso económico.
+
+1) Dibuja un gráfico horizontal de puntos para los tres procesos.
+Podemos realizar un gráfico de puntos, en el cual podemos observar gráficamente si la variable income se comporta de manera diferente en cada uno de los niveles de la variable marital. El procedimiento para realizar el gráfico es el siguiente. En el Menú Gráficas seleccionar la opción Diagrama de puntos.
+```{r}
+stripchart(income ~ marital, vertical=TRUE, method="stack", ylab="income", data=Demo)
+```
+
+2) Muestra un resumen estadístico para los estados maritales.
+El procedimiento es como sigue: en el Menú Estadísticos seleccionar la opción Resúmenes, y dentro del sub Menú que aparecerá seleccionar la opción Resúmenes numéricos. Tal y como se muestra en la figura siguiente.
+```{r}
+library(e1071, pos=18)
+```
+
+
+```{r}
+numSummary(Demo[,"income", drop=FALSE], statistics=c("mean", "sd", "IQR", "quantiles"), 
+  quantiles=c(0,.25,.5,.75,1))
+```
+Al realizar este proceso deberá el cuadro que se muestra a la derecha. En solamente debemos seleccionar la variable income (la cual es cuantitativa), luego dar clic en la casilla Resumir por grupos y seleccionar en la ventana que se presente la variable marital (la cual es cualitativa). Y con esto se nos mostrará un resumen estadístico de la variable income para cada nivel de la variable marital.
+
+3) Dibuja un gráfico de cajas (box-plot) para los estado maritales.
+Para realizar un diagrama de caja de una variable cuantitativa en los diferentes niveles de una segunda variable la cual es cualitativa, el procedimiento es como sigue. En el Menú Gráficas seleccionamos la opción Diagrama de cajas
+```{r}
+Boxplot( ~ income, data=Demo, id=list(method="y"))
+```
+
+4) Gráficas de medias.
+También en algunos casos es útil realizar el gráfico de las medias, el cual nos da mayor información a los diagramas de puntos. Para obtenerlo el procedimiento es: en el Menú Gráficas seleccionamos la opción Gráficas de las medias, tal y como se muestra en la figura. Al realizar este procedimiento deberá aparecernos una ventana en la cual debemos especificar la variable explicativa income (nuestra variable cuantitativa), y los factores, es decir, la variable marital (la cual es cualitativa).
+```{r}
+with(Demo, plotMeans(income, marital, error.bars="se", connect=TRUE))
+```
+
+5o) Prueba de comparación de medias (asumiendo normalidad).
+Se utiliza para contrastar las siguientes hipótesis:
+$H_{0}:\mu_{A}=\mu_{B}$, no existe diferencias de los ingresos para los estados maritales.
+$H_{a}:\mu_{A}\ne\mu_{B}$ , si existe diferencia.
+
+El procedimiento para llevar a cabo tal contraste de hipótesis es mediante la prueba t; en el Menú Estadísticos seleccionamos la opción Medias, y dentro de este seleccionamos la opción Test t para muestras independientes, tal y como se muestra en la siguiente figura. En el cuadro resultante únicamente debemos verificar si explicativa income (que es cuantitativa) y el factor marital (que es cualitativa); definimos el tipo de prueba (una o dos colas), y especificamos si las varianzas son o no iguales.
+```{r}
+t.test(income~marital, alternative='two.sided', conf.level=.95, var.equal=FALSE, data=Demo)
+```
+
+# 3. CUANTITATIVA VR CUALITATIVA.
+
+Se usará el conjunto de datos estatura.dat el cual contiene la información sobre la estatura y peso de estudiantes universitarios, y la altura de sus respectivos padres. Las variables son las siguientes:
+* V1 : estatura del estudiante en cm
+* V2 : peso del estudiante en gramos
+* V3 : sexo del estudiantes 1 mujer, 0 hombre
+* V4 : altura de la madre en cm
+* V5 : altura del padre en cm
+
+1) Lectura de datos.
+```{r}
+estaturas <- read.table("estaturas.dat")
+View(estaturas)
+```
+
+2) Muestra un resumen de principales estadísticos de las variables.
+Lo primero que podría interesarnos es encontrar la matriz de correlaciones entre la estatura de un estudiante y la de su padre. El procedimiento para obtenerla es el siguiente; en el Menú Estadístico seleccionamos la opción Resúmenes y dentro de éste la opción Matriz de correlaciones..., tal y como se muestra en la figura siguiente (izquierda). Posteriormente solo debemos seleccionar las variables en la ventana que se mostrará. También podemos obtener los principales estadísticos para ambas variables de manera conjunta; el procedimiento es como sigue: en el Menú Estadísticos seleccionamos la opción Resúmenes y dentro de éste la opción Resúmenes numéricos, debemos elegir las variables correspondientes,
+```{r}
+cor(estaturas[,c("V1","V5")], use="complete")
+```
+
+3) Elabora un gráfico de dispersión para analizar alguna relación entre las variables.
+Para elaborar un diagrama de dispersión, el procedimiento es: en el Menú Gráficas seleccionamos la opción Diagrama de dispersión (del mismo modo podría seleccionarse la opción Gráfica XY)
+```{r}
+numSummary(estaturas[,"V2", drop=FALSE], statistics=c("mean", "sd", "IQR", "quantiles"), 
+  quantiles=c(0,.25,.5,.75,1))
+```
+
+```{r}
+scatterplot(V1~V5, regLine=FALSE, smooth=FALSE, boxplots=FALSE, data=estaturas)
+```
+
+4) Aplica la función lm() para encontrar el modelo lineal que se ajusta a los datos.
+El procedimiento es el siguiente: en el Menú Estadísticos seleccionamos la opción Ajuste de modelos, y dentro de éste, elegimos Regresión lineal. Posteriormente de realizarlo nos mostrará un cuadro de dialogo en el cual únicamente debemos especificar la variables dependiente (V1 estatura del estudiante) y la explicativa (V5 estatura del padre). Mostrando automáticamente la estimación de los parámetros y las principales medidas de resumen del modelo.
+```{r}
+RegModel.1 <- lm(V1~V5, data=estaturas)
+summary(RegModel.1)
+```
+
+5) Efectúa una análisis de variabilidad del modelo o descomposición de la varianza.
+Para poder visualizar la tabla ANOVA del modelo y evaluar el ajuste global, el procedimiento sería el siguiente: en el Menú Modelos elegimos la opción Test de hipótesis y dentro de éste seleccionamos la opción Tabla ANOVA, tal y como se muestra en la figura siguiente.
+```{r}
+Anova(RegModel.1, type="II")
+```
+
