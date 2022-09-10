@@ -1,0 +1,47 @@
+---
+title: "Ejercicios semana 6"
+author: "Abigail Ramos"
+date: "9/9/2022"
+output: pdf_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+* **Ejercicio 1:** Generar una muestra de tamaño n=200 perteneciente a una población normal $N(10; 2^{2})$.
+```{r}
+#Muestra de una distribución normal
+NormalSamples <- as.data.frame(matrix(rnorm(1*200, mean=10, sd=4), ncol=200))
+rownames(NormalSamples) <- "sample"
+colnames(NormalSamples) <- paste("obs", 1:200, sep="")
+NormalSamples <- within(NormalSamples, {
+  mean <- rowMeans(NormalSamples[,1:200])
+})
+NormalSamples
+```
+
+\newpage
+* **Ejercicio 2:** ¿Cuál es la probabilidad a la derecha de 18.55 para una Variable aleatoria X con distribución Chi-cuadrado de 12 grados de libertad?
+```{r}
+#probabilidad acumulada de chi-cuadrado
+pchisq(c(18.55), df=12, lower.tail=FALSE)
+```
+
+\newpage
+* **Ejercicio 3:** Generar 100 números aleatorios de una distribución Normal con media 4.5 y desviación estándar 0.75
+```{r}
+AleatorioNorm <- as.data.frame(matrix(rnorm(1*100, mean=4.5, sd=0.75), ncol=100))
+rownames(AleatorioNorm) <- "sample"
+colnames(AleatorioNorm) <- paste("obs", 1:100, sep="")
+AleatorioNorm 
+```
+
+\newpage
+* **Ejercicio 4:** Generar números aleatorios de una distribución exponencial, si la media es 2500.
+```{r}
+ExponentialSamples <- as.data.frame(matrix(rexp(1*100, rate=2500), ncol=100))
+rownames(ExponentialSamples) <- "sample"
+colnames(ExponentialSamples) <- paste("obs", 1:100, sep="")
+ExponentialSamples
+```
