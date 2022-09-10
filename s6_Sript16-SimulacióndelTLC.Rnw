@@ -1,0 +1,241 @@
+\documentclass{article}
+\usepackage[a4paper]{geometry}
+\geometry{top=1.5cm, bottom=2.0cm, left=2cm, right=2cm}
+
+\begin{document}
+
+\section{TEOREMA DEL LÍMITE CENTRAL}
+
+El Teorema del Límite Central (TLC) informa acerca de la distribución de muestreo de medias de muestras con tamaño n . Recuérdese que básicamente existen tres tipos de información que se desea conocer sobre una distribución:\\
+1) dónde está el centro,\\
+2) qué tanto varía, y\\
+3) cómo está repartida.\\
+
+El Teorema del Límite Central establece que sí las observaciones 
+$X_{1},X_{2},X_{3},...,X_{n}$ 
+son variables aleatorias independientes e idénticamente distribuidas con una distribución de probabilidad cualquiera y en la cual cada una de ellas tenga la misma media $\mu$ y la misma varianza 2 $\sigma$ (ambas finitas).\\
+
+Entonces el promedio muestral tiene una distribución con media $\mu$ varianza $\sigma^2/n$ que tiende hacia una distribución $N(0,1)$ a medida que n tiende a $\infty$.\\
+
+¿Cómo podemos comprobar esto? La simulación es un excelente camino.\\
+
+1) Activa tu directorio de trabajo
+<<>>=
+getwd()
+setwd("C:/Users/abbyc/Desktop/Ciclo II 2022/Análisis estadístico con R/curso-R-2022")
+@
+
+2) Crea un nuevo script y llámele: Sript16-Simulación del TLC\\
+
+3) Simular el Teorema del Límite Central con datos binomial\\
+
+Consideremos n repeticiones independientes y sea X el número de veces que ocurre un suceso A. Sea $p$ igual a $P(A)$ y supongamos que este número es constante para todas las repeticiones consideradas.\\
+
+El teorema central del límite nos indica que:\\
+$\frac{X-E[X]}{\sqrt{V(X)}}=\frac{X-np}{\sqrt{npq}}$ es aproximadamente $N(0,1)$
+
+\begin{itemize}
+\item\textbf{Ejemplo 1:}
+\end{itemize}
+Generar 100 números aleatorios de una distribución binomial con parámetros $n=10$ (número de ensayos o pruebas), y $p=0.25$ (probabilidad de éxito)
+<<>>=
+# tm= tamaño de la muestra
+tm=100 
+n <- 10
+p <- 0.25
+
+
+#generando las 100 números aleatorios
+S = rbinom(tm, n, p)
+
+
+# estandarizando cada una de las observaciones
+Z = (S-n*p)/sqrt(n*p*(1-p))
+Z
+@
+
+La variable X tiene los resultados, y podemos ver la distribución de los números aleatorios en X con un histograma
+<<>>=
+hist(Z, main="Histograma de Z ~ N(0, 1)", xlab="z = número binomiales estándarizados",
+     ylab="f(z)", prob=TRUE, col="khaki")
+
+curve(dnorm(x, 0, 1), col = "deepskyblue", lty=2, lwd=2, add=TRUE)
+@
+
+La distribución muestra un gráfico aproximadamente normal. Esto es, en forma de campana, centrada en 0 y con desviación estándar 1.\\
+
+4) Simular el TLC con datos de una distribución normal.\\
+El teorema central del límite establece que 
+$\frac{\bar{x}-\mu}{\sigma/\sqrt{n}}\sim N(0,1)$
+
+\begin{itemize}
+\item\textbf{Ejemplo 2:}
+\end{itemize}
+Suponga que $X_{i}$ es normal con media $\mu=5$ y desviación estándar $\sigma=5$. Entonces necesitamos una función para encontrar el valor de $\frac{\bar{x}-\mu}{\sigma/\sqrt{n}}$
+<<>>=
+simulNorm <- function(mu, sigma, m=5, n=100)
+  {
+  vectMedias <<- numeric(0)
+  MediasEstand <<- numeric(0)
+  for (i in 1:m)
+    {
+    X = rnorm(n, mu, sigma)
+    # genera n valores normales
+    vectMedias[i] <<- mean(X)
+    MediasEstand[i] <<- (vectMedias[i] - mu)/(sigma/sqrt(n))
+    }
+}
+
+mu=5
+sigma=5
+m <- 200
+
+
+# número de muestras o medias a obtener
+simulNorm(mu, sigma, m)
+hist(MediasEstand, main="Histograma de medias estándarizadas", 
+     xlab="Valores de m medias normales estándarizadas", prob=TRUE, 
+     col="darkolivegreen3")
+
+curve(dnorm(x, 0, 1), col = "deeppink3", lty=2, lwd=2, add=TRUE)
+@
+
+5) Un mejor gráfico que el histograma para decidir si los datos aleatorios son aproximadamente normal es el llamado gráfico de "probabilidad normal". La idea básica es graficar los cuantiles de sus datos contra los correspondientes cuantiles de la distribución normal. Los cuantiles de un conjunto de datos preferidos son la Mediana, $Q_{1}$ y $Q_{3}$ los más generales. El cuantil q es el valor en los datos donde q*100\%. También el cuantil 0.25 es Q1, el cuantil 0.5 es la mediana y el cuantil 0.75 es $Q_{3}$. Los cuantiles para la distribución teórica son similares, sólo cambia el número de puntos datos menores, o sea el área a la izquierda del monto especificado. Por ejemplo, la mediana parte el área por debajo de la curva de densidad en la mitad.\\
+
+El gráfico de probabilidad normal es fácil de leer si conoce cómo. Esencialmente, si el gráfico parece una línea recta entonces los datos son aproximadamente normal. Está línea no es una línea de regresión. La línea es trazada a través de los puntos formados por el primer y tercer cuartil.\\
+
+R hace todo esto fácil con las funciones qqnorm(), más generalmente qqplot(), y qqline() la cual traza una línea de referencia (no una línea de regresión).
+<<>>=
+qqnorm(MediasEstand, main="X ~ N(0, 1)")
+
+#muestra la línea
+qqline(MediasEstand, lty=1, lwd=2, col="red")
+@
+
+6) Simular el Teorema del Límite Central con datos exponencial\\
+Un ejemplo de una distribución sesgada es la exponencial. Necesitamos conocer que sí tiene media $\mu=10$, entonces la desviación estándar $\sigma$ es también 10, por eso sólo necesitamos especificar la media.\\
+
+Vamos a simular para varios valores de $n$ . Para cada una de las $m =100$ muestras, $n$ será 1, 5, 15, 50 (el número de valores aleatorios en cada uno de los promedios).
+<<>>=
+simulExp <- function(mu, m=5, n=100)
+  {
+  razon <- 1/mu
+  vectMedias <<- numeric(0)
+  MediasEstand <<- numeric(0)
+    for (i in 1:m)
+    {
+    X = rexp(n, razon)
+    # genera n valores exponenciales
+    vectMedias[i] <<- mean(X)
+    MediasEstand[i] <<- (vectMedias[i] - mu)/(mu/sqrt(n))
+    }
+}
+
+par(mfrow=c(2,2))
+
+
+# para n=1
+mu=10
+m <- 100
+n <- 1
+simulExp(mu, m, n)
+hist(MediasEstand, main="Medias Exp(10); n=1", xlab="m medias exp estándarizadas",
+     prob=TRUE, col="darkolivegreen3")
+xvals = seq(from=-3, to=3, by=0.01)
+points(xvals, dnorm(xvals, 0, 1), col = "red", type="l", lty=1, lwd=2)
+
+
+# para n=5
+n <- 5
+simulExp(mu, m, n)
+hist(MediasEstand, main="Medias Exp(10); n=5", xlab="m medias exp estándarizadas",
+     prob=TRUE, col="darkolivegreen3")
+xvals = seq(from=-3, to=3, by=0.01)
+points(xvals, dnorm(xvals, 0, 1), col = "red", type="l", lty=1, lwd=2)
+
+# Repita este proceso para n=15 y n=50
+
+# para n15
+n <- 15
+simulExp(mu, m, n)
+hist(MediasEstand, main="Medias Exp(10); n=15", xlab="m medias exp estándarizadas",
+     prob=TRUE, col="darkolivegreen3")
+xvals = seq(from=-3, to=3, by=0.01)
+points(xvals, dnorm(xvals, 0, 1), col = "red", type="l", lty=1, lwd=2)
+
+# para n=50
+n <- 50
+simulExp(mu, m, n)
+hist(MediasEstand, main="Medias Exp(10); n=50", xlab="m medias exp estándarizadas",
+     prob=TRUE, col="darkolivegreen3")
+xvals = seq(from=-3, to=3, by=0.01)
+points(xvals, dnorm(xvals, 0, 1), col = "red", type="l", lty=1, lwd=2)
+@
+
+Observe que el histograma tiene una forma muy acampanada entre n=15 y n=50, aunque justo en n=50 parece todavía ser un poco sesgada.\\
+
+\textbf{Ejercicio}\\
+1. Simular el Teorema del Límite Central para una variable aleatoria que tiene distribución Poisson con lambda o media 4. Considerar 100 muestras aleatorias de tamaño 1, 10, 30, 50 valores de la distribución. Los gráficos deben estar en una misma ventana.
+<<>>=
+simulPois <- function(mu, m=5, n=100)
+  {
+  razon <- 1/mu
+  vectMedias <<- numeric(0)
+  MediasEstand <<- numeric(0)
+    for (i in 1:m)
+    {
+    X = rpois(n, razon)
+    # genera n valores exponenciales
+    vectMedias[i] <<- mean(X)
+    MediasEstand[i] <<- (vectMedias[i] - mu)/(mu/sqrt(n))
+    }
+}
+
+par(mfrow=c(2,2))
+# para n=10
+n <- 1
+simulPois(mu, m, n)
+hist(MediasEstand, main="Medias pois; n=10", xlab="m medias  estándarizadas",
+     prob=TRUE, col="darkolivegreen3")
+xvals = seq(from=-3, to=3, by=0.01)
+points(xvals, dnorm(xvals, 0, 1), col = "red", type="l", lty=1, lwd=2)
+
+
+# para n=10
+n <- 10
+simulPois(mu, m, n)
+hist(MediasEstand, main="Medias pois; n=10", xlab="m medias estándarizadas",
+     prob=TRUE, col="darkolivegreen3")
+xvals = seq(from=-3, to=3, by=0.01)
+points(xvals, dnorm(xvals, 0, 1), col = "red", type="l", lty=1, lwd=2)
+
+
+# para n=30
+n <- 30
+simulPois(mu,m,n)
+hist(MediasEstand, main="Medias pois; n=30", xlab="m medias estándarizadas",
+     prob=TRUE, col="darkolivegreen3")
+xvals = seq(from=-3, to=3, by=0.01)
+points(xvals, dnorm(xvals, 0, 1), col = "red", type="l", lty=1, lwd=2)
+
+
+# para n=50
+n <- 50
+simulPois(mu, m, n)
+hist(MediasEstand, main="Medias pois; n=50", xlab="m medias estándarizadas",
+     prob=TRUE, col="darkolivegreen3")
+xvals = seq(from=-3, to=3, by=0.01)
+points(xvals, dnorm(xvals, 0, 1), col = "red", type="l", lty=1, lwd=2)
+
+@
+
+
+
+
+
+
+
+
+
+
+\end{document}

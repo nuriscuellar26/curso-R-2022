@@ -1,0 +1,90 @@
+\documentclass{article}
+
+\begin{document}
+\section{CÁLCULO DE PROBABILIDADES.}
+\textbf{Ejemplo 1:}Una persona informal hace esperar a su pareja aleatoriamente entre 0 y 90 minutos. Harto de esta situación, la persona que sufre la espera se plantea un ultimátum; sí al día siguiente su pareja tarda menos de 15 minutos mantiene la relación, sí la espera está entre 15 y 55 minutos, decide en la siguiente cita con los mismos criterios, mientras que si tarda más de 55 minutos la relación termina en ese momento.\\
+
+a)Calcule la probabilidad de que la relación continúe hasta la siguiente cita.\\
+
+Para que la relación se mantenga hasta la próxima cita, es porque la persona ha esperado a su pareja menos de 55 minutos (a lo sumo 55 minutos), por lo que debemos calcular la probabilidad acumulada en una distribución uniforme de que la variable tome el valor de 55 (el área entre 0 y 55). El procedimiento para encontrar distribuciones acumuladas de una uniforme es el siguiente; en el Menú Distribuciones seleccionamos la opción Distribuciones continuas, luego seleccionamos Distribución uniforme y finalmente la opción Probabilidades uniformes... tal y como se muestra en la siguiente figura.
+<<>>=
+punif(c(55), min=0, max=90, lower.tail=TRUE)
+@
+
+Al realizar el procedimiento anterior se mostrara un cuadro de dialogo como el de la figura de a lado. En el únicamente debemos especificar los valores mínimo y máximo de la distribución, y el valor hasta el cual deseamos que calcule la probabilidad acumulada (el valor de 55 en nuestro caso), y se especifica Cola izquierda (probabilidad o área comprendida entre el valor mínimo de 0 y el valor especificado de 55)\\
+
+\textbf{Ejemplo 2:}Una empresa está buscando personal para su departamento de mercadeo. El perfil solicitado es el de
+sujetos extrovertidos y creativos. Se han presentado 50 candidatos y la empresa ha establecido como
+criterio de selección que los candidatos superen el percentil 80 en creatividad y extroversión.
+Sabiendo que la variable extroversión (X) se distribuye según una Normal de media 5 y desviación
+típica 1, que la variable creatividad (Y) sigue una t-Student de 10 grados de libertad y que las
+puntuaciones de creatividad y extroversión son independientes entre si:\\
+
+a) ¿Qué puntuaciones debe superar un aspirante en creatividad y extroversión para ser admitido?\\
+
+Según el criterio de selección se debe superar el percentil 80, en ambas variables, para ser admitido. Se
+calculará pues el percentil 80 de la variable X e Y, utilizando los cuantiles-normales para la variable X:\\
+
+Para obtener los cuantiles (valores que dejan por encima o por debajo un área específica) de cualquier
+distribución continua, en especial los de la distribución normal el procedimiento es el siguiente. En el
+Menú Distribuciones seleccionar la opción Distribuciones continuas, posteriormente Distribución
+normal y finalmente la opción Cuantiles normales
+
+<<>>=
+qnorm(c(0.8), mean=5, sd=1, lower.tail=TRUE)
+@
+Al realizar el procedimiento descrito anteriormente, deberá aparecer un cuadro de dialogo como el de la
+figura de la derecha. En el solamente debemos especificar la media y la desviación típica de la
+distribución normal, en probabilidad se especifica el valor del cuantil que se desea conocer (el valor que
+dejará por debajo de el un área igual a 0.8, seleccionado Cola izquierda).\\
+
+Para obtener los cuantiles de la distribución t de Student el procedimiento similar, solamente
+aplicado a dicha distribución. En el cuadro que se mostrará (llamado Cuantiles t) la única
+diferencia con la distribución normal, radica en que aquí en lugar de especificar el valor de la
+media y la desviación típica se especifica el número de grados de libertad, los demás datos se llenan con los mismos criterios.\\
+<<>>=
+qt(c(0.8), df=10, lower.tail=TRUE)
+@
+
+c)Si se extraen al azar 16 candidatos, ¿cuál es la probabilidad de que su media aritmética en extroversión sea mayor que 4.5?\\
+
+Se sabe que al extraer una muestra de una población normal de tamaño n, la media muestral, sigue
+otra distribución normal de media igual al de la poblacional y desviación típica $\sigma/\sqrt{n}$\\
+
+Para obtener dicha probabilidad en la Distribución normal en lugar de seleccionar la opción de
+cuantiles se selecciona Probabilidad binomiales (nos da la probabilidad acumulada de la variable);
+obteniendo el siguiente cuadro de dialogo, en el solamente debe especificar el valor de la media y de
+la desviación típica (debe escribirse el valor calculado de $\sigma/\sqrt{n}$), y finalmente el valor a partir del cual\\
+encontrará la probabilidad acumulada (4.5 en nuestro caso), como se desea la probabilidad de
+observar datos mayores se elige la opción Cola derecha.
+
+<<>>=
+pnorm(c(4.5), mean=5, sd=0.25, lower.tail=FALSE)
+@
+
+Del mismo modo puede obtenerse la probabilidades acumuladas o los cuantiles para cualquier distribución continua (eligiendo la distribución adecuada).\\
+
+\section{GENERACIÓN DE MUESTRAS ALEATORIAS DE LAS DISTRIBUCIONES}
+
+\textbf{Ejemplo 1:}Generar 100 números aleatorios de una distribución Uniforme en el intervalo [-2, 4]\\
+
+El procedimiento para generar muestras aleatorias de una distribución uniforme es el siguiente: en el
+Menú Distribuciones se selecciona Distribuciones continuas, luego se elige Distribución uniforme y
+finalmente la opción Muestra de una distribución uniforme.\\
+
+Al realizar el procedimiento anterior nos mostrará un cuadro de dialogo como el de la
+figura de la derecha. En el solamente debemos darle nombre al conjunto de datos, especificar los
+valores mínimo y máximo de la distribución, el número de muestras a generar y el número de
+observaciones de la muestra (tamaño de la muestra).
+<<>>=
+UniformSamples <- as.data.frame(matrix(runif(1*100, min=-2, max=4), ncol=100))
+rownames(UniformSamples) <- "sample"
+colnames(UniformSamples) <- paste("obs", 1:100, sep="")
+UniformSamples
+@
+
+Para generar muestras de cualquier distribución el procedimiento es el mismo, teniendo en cuenta
+únicamente los parámetros que definen a cada una de las distribuciones.
+
+
+\end{document}
