@@ -164,8 +164,8 @@ hist(x.norm, breaks = "Sturges", freq = TRUE, probability = FALSE, include.lowes
      main = "Histograma de datos observados", axes = TRUE, plot = TRUE, labels = FALSE)
 
 
-# Podemos estimar la densidad de frecuencia usando la función density() y plot() para dibujar su
-gráfica
+# Podemos estimar la densidad de frecuencia usando la función density() y plot() 
+#para dibujar su gráfica
 plot(density(x.norm), main="Densidad estimada de los datos")
 
 
@@ -204,7 +204,7 @@ Generar números aleatorios de una distribución exponencial. Por ejemplo, si la
 <<>>=
 # Definir el parámetro apropiado
 media <- 2500
-razon <- 1/medi
+razon <- 1/media
 n=100
 
 
