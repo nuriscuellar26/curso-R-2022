@@ -1,5 +1,6 @@
 \documentclass{article}
-
+\usepackage[a4paper]{geometry}
+\geometry{top=1.5cm, bottom=2.0cm, left=2cm, right=2cm}
 \begin{document}
 
 \section{ANÁLISIS ESTADÍSTICO DE DATOS CATEGÓRICOS.}
