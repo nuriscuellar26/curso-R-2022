@@ -1,7 +1,7 @@
 \documentclass{article}
 \usepackage{parskip}
 \begin{document}
-\section{REALICE UN ANÁLISIS ESTADÍSTICO DE LOS DATOS.} \newline
+\section{REALICE UN ANÁLISIS ESTADÍSTICO DE LOS DATOS.} 
 
 \textbf{Ejemplo:} Se selecciona aleatoriamente una muestra de 18 personas adultas, para estudiar si existe relación entre su estado civil y su ocupación.\newline
 
