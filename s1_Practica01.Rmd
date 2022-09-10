@@ -1,0 +1,61 @@
+---
+title: 'UNIDAD 1: Práctica 01-Introducción al entorno de desarrollo de R'
+author: "Abigail Ramos"
+output: pdf_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+## 7. Ejemplos de cálculo numérico en la Consola de R (R-Console)
+**Ejemplo 1.** Encontrar el resultado de operar: 2 más 10 por 3 entre 5
+```{r}
+2+10*3/5
+```
+
+**Ejemplo 2.** Encontrar el resultado de operar: 3 elevado a la potencia 100
+```{r}
+3^100 #o también
+format(3^100, sci = FALSE)
+```
+
+Sci=FALSE le indica a R que muestre todos los dígitos del resultado, de lo contrario (Sci=TRUE) solamente se mostrará la representación científica.
+
+**Ejemplo 3.** Encontrar el resultado anterior con 15 cifras decimales y guardarlo en la variable y
+```{r}
+y <- format(3^100, digits = 15);y 
+#o y = format(3^100, digits = 15)
+```
+
+**Ejemplo 4.** Redondear el valor de $\pi$ a 4 digitos decimales
+```{r}
+round(pi, 4)
+#Aplique las funciones: 
+trunc(pi)
+floor(pi) 
+ceiling(pi)
+```
+
+
+**Ejemplo 5.** Guardar en la variable n el valor 150 y luego calcular el valor de n
+```{r}
+n = 150
+factorial(n)
+```
+
+
+**Ejemplo 6.** Operar el complejo (2+3i) elevado a la potencia 10
+```{r}
+(2+3i)^10 
+#o también 
+format((2+3i)^10, sci = TRUE)
+```
+
+
+**Ejemplo 7.** Calcular la integral entre 0 y $\pi$ de la función $Seno(x)$
+```{r}
+f <- function(x) {sin(x)}
+integrate(f, lower = 0, upper = pi)
+```
+
