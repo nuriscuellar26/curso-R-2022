@@ -1,0 +1,286 @@
+\documentclass{article}
+\usepackage[a4paper]{geometry}
+\geometry{top=1.5cm, bottom=1.0cm, left=2cm, right=2cm}
+\begin{document}
+
+
+
+
+\section{DISTRIBUCIONES CONTINUAS.}
+\section{CÁLCULO DE PROBABILIDADES.}
+\begin{itemize}
+\item\textbf{Ejemplo 1:} Una persona informal hace esperar a su pareja aleatoriamente entre 0 y 90 minutos. Harto de esta situación, la persona que sufre la espera se plantea un ultimátum; sí al día siguiente su pareja tarda menos de 15 minutos mantiene la relación, sí la espera está entre 15 y 55 minutos, decide en la siguiente cita con los mismos criterios, mientras que si tarda más de 55 minutos la relación termina en ese momento.
+\end{itemize}
+
+a) Calcule la probabilidad de que la relación continúe hasta la siguiente cita.
+<<>>=
+x <- 55
+a=0
+b = 90
+#usando la función propia de R
+punif(x, min=a, max=b, lower.tail=TRUE)
+@
+
+b) Calcule la probabilidad de que la relación termine en la segunda cita. Suponiendo que el tiempo de espera en una cita es independiente respecto de otras citas, se calcula la probabilidad $P(15 < X < 55) = P(X < 55)-P(X \le 15) = 0.6111-0.1666 = 0.4445$\\
+
+<<>>=
+F55=punif(55, min=a, max=b, lower.tail=TRUE)
+F15=punif(15, min=a, max=b, lower.tail=TRUE)
+F55-F15
+@
+
+que es la probabilidad de que aplace la decisión para la segunda cita y, en la segunda cita, la probabilidad de que lo deje definitivamente es $P(X > 55) = 0.3888$\\
+<<>>=
+F55=punif(55, min=a, max=b, lower.tail=TRUE)
+F55
+@
+
+luego multiplicando ambas probabilidades se obtiene el valor pedido 0.1728.
+<<>>=
+(1-F55)*( F55-F15)
+@
+
+
+\begin{itemize}
+\item\textbf{Ejemplo 2:} Una empresa está buscando personal para su departamento de mercadeo. El perfil solicitado es el de sujetos extrovertidos y creativos. Se han presentado 50 candidatos y la empresa ha establecido como criterio de selección que los candidatos superen el percentil 80 en creatividad y extroversión. Sabiendo que la variable extroversión (X) se distribuye según una Normal de media 5 y desviación típica 1, que la variable creatividad (Y) sigue una t-Student de 10 grados de libertad y que las puntuaciones de creatividad y extroversión son independientes:
+\end{itemize}
+
+a) ¿Cuántos candidatos serán seleccionados?\\
+Al ser X e Y independientes, la probabilidad
+$PX\ge P80\cap Y\ge P80=P(X\ge P80) P(Y\ge P80)=(0.20)(0.20)=0.04$
+Como se han presentado 50 aspirantes, serán seleccionadas $(50)(0.04)=2$ personas.\\
+
+b) ¿Qué puntuaciones debe superar un aspirante en creatividad y extroversión para ser admitido? Según el criterio de selección se debe superar el percentil 80, en ambas variables, para ser admitido. Se calculará pues el percentil 80 de la variable X e Y, utilizando los cuantiles-normales para la variable X:\\
+<<>>=
+#y los cuantiles-normales para la variable X:
+p <- c(0.80)
+media=5
+d.t=1
+qnorm(p, mean=media, sd=d.t, lower.tail=TRUE)
+
+#y los cuantiles-t para la variable Y:
+p <- c(0.80)
+g.l <- 10
+qt(p, df=g.l, lower.tail=TRUE)
+@
+
+c) Si se extraen al azar 16 candidatos, ¿cuál es la probabilidad de que su media aritmética en extroversión sea mayor que 4.5?\\
+Se sabe que al extraer una muestra de una población normal de tamaño n, la media muestral, sigue otra distribución normal de media igual que la poblacional y desviación típica $\sigma / \sqrt{n}$\\
+
+Como se desea calcular $P(\bar{x}\ge 4.5)$
+<<>>=
+n <- 16
+x <- 4.5
+mu=5
+sigma=1
+d.t=sigma/sqrt(n)
+pnorm(x, mean=mu, sd=d.t, lower.tail=FALSE)
+@
+
+\begin{itemize}
+\item\textbf{Ejemplo 3:}La duración media de un modelo de marcapasos es de 7 años.
+\end{itemize}
+
+a) ¿Cuál es la probabilidad de que dure al menos 5 años? ¿y menos de 3 años? Suponiendo que la variable X="tiempo de funcionamiento del marcapasos" sigue una distribución exponencial con parámetro $\lambda=1/\theta=1/7 $ con $\theta=E[X]$ tiempo promedio.\\
+
+La probabilidad $P(X\ge 5)$ se obtiene así:
+<<>>=
+x <- 5
+teta=7
+pexp(x, rate=1/teta, lower.tail=FALSE)
+@
+
+y de igual forma $P(X<3)$:
+<<>>=
+x <- 3
+teta=7
+pexp(x, rate=1/teta, lower.tail=TRUE)
+@
+
+b) Si han transcurrido ya 4 años desde su implantación, ¿cuál es la probabilidad de que dure otros 4?\\ 
+Nos piden $P(X\ge 8/ X\ge 4)$ Teniendo en cuenta que la función de distribución es la única distribución continua no tiene memoria resulta que $P(X\ge 8/ X\ge 4)=P(X\ge 4)=0.5647182$
+<<>>=
+pexp(4, rate=1/teta, lower.tail=FALSE)
+@
+
+c) ¿Cuánto tiempo debería funcionar un marcapasos para estar entre el 10\% de los que más duran?\\
+
+Hay que calcular el percentil 90:
+<<>>=
+p <- 0.9
+teta <- 7
+qexp(p, rate=1/teta, lower.tail=TRUE)
+#resultando 16.12 años.
+@
+
+d) Calcular el valor que deben tener a y b para que $P(X<a)=0.5$ y $P(X>b)= 0.32$\\
+De forma análoga al apartado anterior, en el primer caso habría que calcular la mediana (percentil 50), $a = 4.852$,
+<<>>=
+qexp(0.5, rate=1/teta, lower.tail=TRUE)
+
+#y en el segundo caso, el percentil 68, b = 7.97
+qexp(0.68, rate=1/teta, lower.tail=TRUE)
+
+#o de esta otra manera
+qexp(0.32, rate=1/teta, lower.tail=FALSE)
+@
+
+\section{GENERACIÓN DE MUESTRAS ALEATORIAS DE LAS DISTRIBUCIONES}
+
+\begin{itemize}
+\item\textbf{Ejemplo 1:}
+\end{itemize}
+
+Generar 100 números aleatorios de una distribución Uniforme en [-2, 4]
+<<>>=
+# Definir los parámetros apropiados
+min <- -2
+max <- 4
+
+# generar 100 números aleatorios de la distribución
+x = runif(100, min, max)
+x
+
+# Histograma para la nuestra aleatoria de tamaño 100
+hist(x, main="X ~ Uniforme(min=-2, max=4", xlab="X", ylab="densidad de probabilidad", 
+     probability=TRUE, col="green")
+
+# Graficar la función de densidad, use la función curve() para variable continua
+curve(dunif(x, min, max), col="blue", add=TRUE)
+@
+
+\begin{itemize}
+\item\textbf{Ejemplo 2:}
+\end{itemize}
+Supongamos que tenemos una muestra de tamaño n=200 perteneciente a una población normal
+$N(10,2)$ con $\mu = 10$ y $\sigma=2$:
+<<>>=
+#genera los valores aleatorios de la distribución
+x.norm <- rnorm(n=200,mean=10, sd=2)
+
+# Podemos obtener un histograma usando la función hist()
+hist(x.norm, breaks = "Sturges", freq = TRUE, probability = FALSE, include.lowest = TRUE, 
+     right = TRUE, density = NULL, angle = 45, col = "steelblue1", border = NULL, 
+     main = "Histograma de datos observados", axes = TRUE, plot = TRUE, labels = FALSE)
+
+
+# Podemos estimar la densidad de frecuencia usando la función density() y plot() para dibujar su
+gráfica
+plot(density(x.norm), main="Densidad estimada de los datos")
+
+
+# R permite calcular la función de distribución acumulada teórica con ecdf()
+plot(ecdf(x.norm),main="Función de distribución acumulada teórica")
+@
+
+\begin{itemize}
+\item\textbf{Ejemplo 3:}
+\end{itemize}
+Generar 100 números aleatorios de una distribución Normal con media 4.5 y desviación estándar 0.75
+<<>>=
+# Definir los parámetros apropiados
+media <- 4.5
+desviacion <- 0.75
+
+
+# generar 100 números aleatorios de la distribución
+x = rnorm(100, media, desviacion)
+x
+
+
+# Histograma para la nuestra aleatoria de tamaño 100
+hist(x,main=expression(paste("X ~ N(", mu, " = 4.5, ", sigma, " = 0.75)")), 
+     xlab="X", ylab="densidad de probabilidad", probability=TRUE, col=gray(0.9))
+
+
+# Graficar la función de densidad teórica, usando la función curve()
+curve(dnorm(x, media, desviacion), col="red", lwd=2, add=TRUE)
+@
+
+\begin{itemize}
+\item\textbf{Ejemplo 4:}
+\end{itemize}
+Generar números aleatorios de una distribución exponencial. Por ejemplo, si la vida media de un bulbo de luz es 2500 horas, uno puede pensar que el tiempo de vida es aleatorio con una distribución exponencial que tiene media 2500. El único parámetro es la razón = 1/media.
+<<>>=
+# Definir el parámetro apropiado
+media <- 2500
+razon <- 1/medi
+n=100
+
+
+# generar 100 números aleatorios de la distribución
+x = rexp(n, razon)
+x
+
+
+# Histograma para la nuestra aleatoria de tamaño 100
+hist(x, main="X ~ Exponencial( media = 2500 )", xlab="X", 
+     ylab="densidad de probabilidad", probability=TRUE, col="green")
+
+
+# Graficar la función de densidad, usando la función curve()
+curve(dexp(x, razon), col="blue", lwd=2, add=TRUE)
+@
+
+\section{FUNCIONES DE DISTRIBUCIÓN Y SU INVERSA (LOS CUANTILES).}
+En R, las funciones a las que se les antepone una "p" permiten contestar cuál es la probabilidad de que una variable aleatoria X sea menor o igual que x, esto es $F(x)=P[X\le x]$ . Las funciones a las que se les antepone una "q" son lo inverso de esto, ellas permiten conocer qué valor de una variable aleatoria X corresponde a una probabilidad p dada. Esto es el cuantil $X_{q}$ o punto en el que los datos son partidos, $P[X\le x_{q}]=p$\\
+
+\begin{itemize}
+\item\textbf{Ejemplo 1:}Para una Variable aleatoria X con distribución normal de media 1 y desviación estándar 1, ¿cuál es la probabilidad de que sea menor que 0.7?
+\end{itemize}
+<<>>=
+x <- 0.7
+p <- pnorm(x, mean=1, sd=1, lower.tail = TRUE) 
+p
+@
+
+Observación: lower.tail=TRUE es el valor por defecto, para indicar las probabilidades son $P[X\le x]$,
+en otro caso será $P[X > x]$.
+
+\begin{itemize}
+\item\textbf{Ejemplo 2:} Para una variable aleatoria con distribución normal estándar, encontrar $P[Z\le 0.7]$ y $P[Z> 0.7]$.
+\end{itemize}
+<<>>=
+z <- 0.7
+p1 <- pnorm(z, mean=0, sd=1)
+p1
+p2 <- pnorm(z, mean=0, sd=1, lower.tail=FALSE)
+p2
+@
+
+Observación: ya que $P[Z>0.7 ]=1-P[Z\le 0.7]$, obtenemos el mismo resultado con
+<<>>=
+p3 <- 1-pnorm(z, mean=0, sd=1)
+p3
+@
+
+\begin{itemize}
+\item\textbf{Ejemplo 3:}¿Qué valor de una variable aleatoria con distribución normal estándar, tiene 75\% del área a la izquierda?.
+\end{itemize}
+<<>>=
+p <- 0.75
+z <- qnorm(p, mean=0, sd=1, lower.tail = TRUE)
+z
+@
+
+Observación: note que el valor de z que resuelve $P[Z\le z]= 0.75$ es el tercer cuartil (Q3), esto es $z=0.6744898$
+
+\begin{itemize}
+\item\textbf{Ejemplo 4:}¿Cuál es la probabilidad a la derecha de 18.55 para una Variable aleatoria X con distribución Chi-cuadrado de 12 grados de libertad?
+\end{itemize}
+<<>>=
+x <- 18.55
+gl <- 12
+p <- pchisq(x, gl, lower.tail = FALSE)
+p
+@
+
+
+
+
+
+
+
+
+
+\end{document}

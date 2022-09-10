@@ -1,0 +1,145 @@
+\documentclass{article}
+\usepackage[a4paper]{geometry}
+\geometry{top=1.5cm, bottom=1.0cm, left=2cm, right=2cm}
+\begin{document}
+
+\section{GENERACIÓN DE ESPACIOS MUESTRALES Y DE MUESTRAS ALEATORIAS.}
+
+La función sample(): permite seleccionar una muestra aleatoria de tamaño n , especificado el vector x desde el cual tomará la muestra (normalmente es un vector de caracteres aunque no es indispensable), la selección puede ser con o sin reemplazo. La sintaxis general de esta función es:\\
+
+\textbf{sample(X, size, replace = FALSE, prob = NULL)}\\
+donde
+* X: es el vector del cual se seleccionan la muestra (podría decirse que representa el marco muestral).\\
+* size: es el tamaño de la muestra.\\
+* replace = FALSE indica que la muestra en sin reposición, si fuera TRUE sería con reposición.\\
+* prob: vector de pesos o probabilidad de obtener los elementos del vector X que está siendo muestreado (en caso de que los elementos tengan distintas probabilidades).\\
+
+1) Activa tu directorio de trabajo\\
+
+2) Crea un nuevo Script y llámale "Script13-Probabilidades1"\\
+
+3) Simular 10 lanzamientos de una moneda
+<<>>=
+# vector del cual se tomará la muestra
+moneda <- c("C", "+") 
+moneda
+
+# tamaño de la muestra
+n <- 10
+n
+
+#generando la muestra aleatoria con reemplazamiento (replace=TRUE)
+lanzamientos <- sample(moneda, n, replace=TRUE)
+lanzamientos
+@
+
+4) Elegir 6 números de una lotería de 54 números
+<<>>=
+# se define el espacio muestral del cual se tomará la muestra
+espacio <- 1:54
+espacio
+
+# se define el tamaño de la muestra
+n <- 6
+n
+
+# seleccionando la muestra sin reposición
+muestra <- sample(espacio, n)
+muestra
+@
+
+\textbf{OBSERVACIÓN:} por defecto la selección es sin reemplazo o sin reposición, pero no se reduce el espacio muestral; en otras palabras lo que esto significa es que a pesar de que la muestra se selecciona sin reposición, el vector (del cual se selecciona la muestra) permanece sin cambio alguno; para nuestro ejemplo en particular en el vector muestra se almacenan los 6 elementos seleccionados del vector espacio, sin embargo, en el vector espacio estos elementos se conservan; esto presentan un inconveniente si se desea seleccionar una segunda muestra pero en la cual no se encuentre ningún elemento contenido en la primera, tendrían que descartarse primero antes de tomar una segunda muestra.\\
+
+5) Simular 4 lanzamientos de dos dados
+<<>>=
+# genera el espacio muestral del lanzamiendo de los dos dados
+espacio = as.vector(outer(1:6, 1:6, paste))
+espacio
+
+# la función outer genera un arreglo (una matriz) de caracteres en el cual el primer elemento es
+#un número entre 1 y 6 (obtenido por la instrucción 1:6), mientras que en el segundo también es
+#un número entre 1 y 6 (obtenido por la instrucción 1:6). Es un arreglo de orden 6 x 6.
+# con la instrucción as.vector se convierte en un vector el arreglor.
+
+# se define el tamaño de la muestra
+n <- 4
+n
+
+# finalmente se selecciona la muestra
+muestra <- sample(espacio, n, replace=TRUE)
+muestra
+@
+
+6) Seleccionar cinco cartas de un naipe de 52 cartas
+<<>>=
+#genera el espacio muestral de las 52 cartas
+naipe = paste(rep(c("A", 2:10, "J", "Q", "K"), 4), c("OROS","COPAS", "BASTOS",
+"ESPADAS"))
+naipe
+@
+
+Con la instrucción rep(c("A", 2:10, "J", "Q", "K"), 4) se crea un vector de caracteres, el primer elemento es “A”, los elementos de segundo al undécimo son número del 2 al 10, los siguientes elementos son “J”, “Q” y “K”; y los elementos se repiten en este orden cuatro veces.\\
+
+Con la función paste se crea un vector en el que sus elementos son: un elemento del vector rep(c("A", 2:10, "J", "Q", "K"), 4) concatenado con uno del vector c("OROS","COPAS", "BASTOS","ESPADAS").\\
+
+\begin{itemize}
+
+\item El primer elemento de rep(c("A", 2:10, "J", "Q", "K"), 4) con el primero de c("OROS","COPAS", "BASTOS", "ESPADAS").\\
+
+\item El segundo elemento de rep(c("A", 2:10, "J", "Q", "K"), 4) con el segundo de c("OROS","COPAS", "BASTOS", "ESPADAS").\\
+
+\item El tercer elemento de rep(c("A", 2:10, "J", "Q", "K"), 4) con el tercero de c("OROS","COPAS", "BASTOS", "ESPADAS").\\
+
+\item Y así sucesivamente.\\
+
+\end{itemize}
+
+<<>>=
+# se define el tamaño de la muestra
+n <- 5
+n
+
+# se obtiene la muestra sin reemplazo (aunque no se especifique con replace=FALSE)
+cartas <- sample(naipe, n)
+cartas
+@
+
+7) Generar una muestra aleatoria de tamaño 120, con los números del 1 al 6 en el que las probabilidades de cada uno de los números son respectivamente los siguientes valores: 0.5, 0.25, 0.15, 0.04, 0.03 y 0.003.
+<<>>=
+sample(1:6,120,replace=TRUE, c(0.5,0.25,0.15,0.04,0.03,0.03))
+# note que en el vector c(0.5,0.25,0.15,0.04,0.03,0.03) se especifican las probabilidades 
+#de cada uno de los elementos, por lo que la suma de cada uno de los elementos del vector debe ser uno.
+@
+
+Note que R siempre generará la muestra sin importar si la suma es o no la unidad, sin embargo, para que la muestra sea verdaderamente aleatoria la suma de las probabilidades debe ser igual a la unidad.\\
+
+8) Escriba una función que reciba los números enteros entre 1 y 500 inclusive, la función retornará el espacio formado por los números divisibles entre 7. Después de llamar a esta función se extraerá aleatoriamente 12 de estos números, con reemplazo.
+<<>>=
+# definiendo la función que generará el espacio formado
+espacio<-function(num)
+{
+  
+  numDiv7<-numeric(0)
+  ind<-0
+  for(i in 1:length(num))
+    if((num[i]%%7)==0)
+    {
+      ind<-ind+1
+      numDiv7[ind]=num[i]
+    }
+  return(numDiv7)
+}
+numeros<-1:500
+
+# generando el espacio muestral
+s <- espacio(numeros)
+s
+
+# seleccionando la muestra
+muestra <- sample(s, 12, replace=TRUE)
+muestra
+@
+
+
+
+\end{document}
