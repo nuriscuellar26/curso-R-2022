@@ -1,0 +1,966 @@
+---
+title: "Semana 9: DISEÑO ESTADÍSTICO DE EXPERIMENTOS"
+format:
+  pdf:
+    toc: true
+    number-sections: true
+---
+\newpage
+# Diseño Completamente Aleatorio con efectos fijos (Diseño unifactorial de efectos fijos)
+
+**Supuesto práctico 1**
+
+La contaminación es uno de los problemas ambientales más importantes que afectan a nuestro mundo. En las grandes ciudades, la contaminación del aire se debe a los escapes de gases de los motores de explosión, a los aparatos domésticos de la calefacción, a las industrias,… El aire contaminado nos afecta en nuestro vivir diario, manifestándose de diferentes formas en nuestro organismo. Con objeto de comprobar la contaminación del aire en una determinada ciudad, se ha realizado un estudio en el que se han analizado las concentraciones de monóxido de carbono (CO) durante cinco días de la semana (lunes, martes, miércoles, jueves y viernes).
+
+* Variable respuesta: Concentración de CO.
+
+* Factor: Día de la semana que tiene cinco niveles. Es un factor de efectos fijos ya que viene decidido qué niveles concretos se van a utilizar (5 días de la semana).
+
+* Modelo equilibrado: Los niveles de los factores tienen el mismo número de elementos (8 elementos).
+
+* Tamaño del experimento: Número total de observaciones, en este caso 40 unidades experimentales.
+
+El problema planteado se modeliza a través de un **diseño unifactorial totalmente aleatorizado de efectos fijos equilibrado.**
+
+Para realizar este supuesto en R debemos introducir primero los datos de forma correcta. Podemos realizarlo directamente en R de forma manual o introducirlos previamente en un archivo de texto o Excel y leerlos en R.
+
+```{r}
+contaminacion <- read.table('supuesto1.txt', header = TRUE)
+contaminacion
+```
+
+1. Transformar la variable referente a los niveles del factor fijo como factor
+
+```{r}
+contaminacion$dia<-factor(contaminacion$Dia)
+contaminacion$dia
+```
+
+Para calcular la tabla ANOVA primero hacemos uso de la función “aov” de la siguiente forma:
+
+```{r}
+mod<-aov(Concentracion~Dia,data = contaminacion);mod
+```
+
+donde:
+
+* Concentracion = nombre de la columna de las observaciones.
+
+* Dia = nombre de la columna en la que están representados los tratamientos.
+
+* data= data.frame en el que están guardados los datos.
+
+Se puede mostrar un resumen de los resultados con la función “summary” (verdadera tabla ANOVA)
+
+```{r}
+summary(mod)
+```
+
+Si el valor de F es mayor que uno quiere decir que hay un efecto positivo del factor día. Se observa que el P-valor (Sig.) tiene un valor de 0.003524, que es menor que el nivel de significación 0.05. Por lo tanto, hemos comprobado estadísticamente que estos cinco grupos son distintos. Es decir, existen diferencias significativas en las concentraciones medias de monóxido de carbono entre los cinco días de la semana. Por lo tanto no se puede rechazar la hipótesis alternativa que dice que al menos dos grupos son diferentes, pero ¿Cuáles son esos grupos? ¿Los cinco grupos son distintos o sólo alguno de ellos? Pregunta que resolveremos más adelante mediante los contrastes de comparaciones múltiples.
+
+2. En la expresión del comando “aov” indicar el factor
+
+```{r}
+mod1<-aov(Concentracion~factor(Dia),data = contaminacion);mod1
+
+summary(mod1)
+```
+
+También se puede utilizar el comando “anova” y no es necesario el comando “summary”
+
+```{r}
+mod2 <- anova (lm (Concentracion ~ factor (Dia), data = contaminacion));mod2
+```
+
+Los datos pueden venir dados en diferentes formatos:
+
+1. Caso en el que los datos se muestran de forma que se analiza la contaminación con cada uno de los dias de la semana (de lunes a viernes). Como se muestra a continuación
+
+```{r}
+contaminacion <- read.table('supuesto1-1.txt', header = TRUE)
+contaminacion
+```
+
+En primer lugar apilaremos las columnas, para ello utilizamos el comando “stack” de la siguiente forma
+
+```{r}
+trats<-stack(contaminacion);trats
+```
+
+Nos muestra dos columnas:
+
+* La primera columna: values nos muestra los valores de la variable respuesta. En este caso la contaminación
+
+* La segunda columna: ind nos muestra los diferentes tratamientos
+
+Podemos realizar el Análisis de la varianza utilzando el comando **anova**
+
+```{r}
+anova(lm(values ~ ind, data = trats))
+```
+
+2. Los datos vienen dados de la siguiente forma:
+
+Lunes: 420, 390, 480, 430, 440, 324, 450, 460
+
+Martes: 450, 390, 430, 521, 320, 360, 342, 423
+
+Miércoles: 355, 462, 286, 238, 344, 423, 123, 196
+
+Jueves: 321, 254, 412, 368, 340, 258, 433, 489
+
+Viernes: 238, 255, 366, 389, 198, 256, 248, 324
+
+Se crean cinco vectores, cada uno de ellos representando la contaminación con un tratamiento.
+
+```{r}
+Lu= c(420, 390, 480, 430, 440, 324, 450, 460)
+Ma = c(450, 390, 430, 521, 320, 360, 342, 423)
+Mi= c(355, 462, 286, 238, 344, 423, 123, 196)
+Ju=c(321, 254, 412, 368, 340, 258, 433, 489)
+Vi= c(238, 255, 366, 389, 198, 256, 248, 324)
+
+Lu;Ma;Mi;Ju;Vi
+```
+
+Acontinuación creamos un data.frame para poder resolver el ANOVA
+
+```{r}
+datos = data.frame(Lu, Ma, Mi, Ju,Vi)
+datos
+```
+
+De esta forma hemos creado una nueva base de datos que hemos llamado  **“datos“**. Para resolver el ANOVA tenemos  primero que apilar las columnas con el comando **“stack”**
+
+```{r}
+datos1 = stack(datos)
+datos1
+
+# Resolvemos el ANOVA como en el caso anterior
+
+anova(lm(values ~ ind, data = datos1))
+```
+
+3. Los datos se muestren en un solo vector que tiene todos los datos de la contaminación tanto si se ha medido el lunes, el martes, el miércoles, el jueves o el viernes
+
+```{r}
+contaminacion = c(Lu, Ma, Mi, Ju, Vi)
+contaminacion
+
+# Comando length
+length(contaminacion)
+```
+
+Para realizar el ANOVA, ya tenemos los datos de la variable respuesta y a continuación tenemos que crear el factor tratamiento, para ello vamos a utilizar la función generador de niveles, gl,  y le decimos que nos genere 5 niveles que son los cinco tratamientos, cada uno repetido 8 veves con un total de 40 datos y para identificar que nivel es cada uno, creamos las etiquetas L, M, Mi, J y V
+
+```{r}
+trat = gl(5,8,40, labels= c ('L', 'M', 'Mi', 'j', 'V'));trat
+
+anova(lm(contaminacion~trat))
+```
+
+El modelo que hemos propuesto hay que validarlo, para ello hay que comprobar si se verifican las hipótesis básicas del modelo, es decir, si las perturbaciones son variables aleatorias independientes con distribución normal de media 0 y varianza constante (homocedasticidad).
+
+# Estudio de la Idoneidad del modelo
+
+## Hipótesis de normalidad
+En primer lugar, analizamos la normalidad de las concentraciones y continuamos con el análisis de la normalidad de los residuos.
+
+Para analizar la normalidad de las concentraciones utilizamos el test de Shapiro-Wilks
+
+```{r}
+shapiro.test(mod$residuals)
+```
+
+Observamos el contraste de Shapiro-Wilk que es adecuado cuando las muestras son pequeñas (n < 50) y es una alternativa más potente que el test de Kolmogorov-Smirnov. El p-valor es mayor que el nivel de significación del 5%, concluyendo que las muestras de las concentraciones se distribuyen de forma normal en cada día de la semana.
+
+Podemos verlo también gráficamente con la orden “qqnorm”
+
+```{r}
+qqnorm (mod$residuals)
+```
+
+Podemos apreciar en este gráfico que los puntos aparecen próximos a la línea diagonal. Esta gráfica no muestra una desviación marcada de la normalidad.
+
+## Hipótesis de homocedasticidad
+Para comprobar la hipótesis de igualdad entre las varianzas del factor utilizamos el Test de Barlett.
+
+```{r}
+contaminacion <- read.table('supuesto1.txt', header = TRUE)
+contaminacion$dia<-factor(contaminacion$Dia)
+bartlett.test(contaminacion$Concentracion, contaminacion$Dia)
+```
+
+El p-valor es del 0.2402 que al ser mayor del nivel significación usual del 5% no podemos rechazar la hipótesis de igualdad de varianzas, es decir, se acepta la igualdad de varianzas en el factor.
+
+## Hipótesis de independencia
+Para comprobar que se satisface el supuesto de independencia entre los residuos analizamos el gráfico de los residuos frente a los valores pronosticados o predichos por el modelo. El empleo de este gráfico es útil puesto que la presencia de alguna tendencia en el mismo puede ser indicio de una violación de dicha hipótesis. En R obtenemos varios gráficos a la vez que están incluidos en la estimación del modelo.
+
+Para verlos de forma correcta hacemos uso de las siguientes órdenes:
+
+```{r}
+layout(matrix(c(1,2,3,4),2,2)) # para que salgan en la misma pantalla
+plot(mod)
+```
+
+En la Figura 5 se muestran cuatro gráficos, en el primero de ellos que se representan los residuos en el eje de ordenadas y los valores pronosticados en el eje de abscisas. No observamos, en dicho gráfico, ninguna tendencia sistemática que haga sospechar del incumplimiento de la suposición de independencia.
+
+Anteriormente, hemos comprobado estadísticamente que estos cinco grupos son distintos. Es decir no se puede rechazar la hipótesis alternativa que dice que al menos dos grupos son diferentes, pero ¿Cuáles son esos grupos? ¿Los cinco grupos son distintos o sólo alguno de ellos? Pregunta que resolveremos más adelante mediante los contrastes de comparaciones múltiples.
+
+# Comparaciones múltiples
+Para saber entre que parejas de días las diferencias entre concentraciones medias de CO  son significativas aplicamos la prueba **Post-hoc de Tukey**
+
+```{r}
+mod.tukey<- TukeyHSD(mod, ordered = TRUE)
+mod.tukey
+```
+
+Esta salida nos muestra los intervalos de confianza simultáneos construidos por el método de Tukey. En la tabla se muestra un resumen de las comparaciones de cada tratamiento con los restantes. Es decir, aparecen comparadas dos a dos las cinco medias de los tratamientos.
+
+# Diseño Unifactorial de efectos aleatorios
+
+**Supuesto práctico 2**
+
+Los medios de cultivo bacteriológico en los laboratorios de los hospitales proceden de diversos fabricantes. Se sospecha que la calidad de estos medios de cultivo varía de un fabricante a otro. Para comprobar esta teoría, se hace una lista de fabricantes de un medio de cultivo concreto, se seleccionan aleatoriamente los nombres de cinco de los que aparecen en la lista y se comparan las muestras de los instrumentos procedentes de éstos. La comprobación se realiza colocando sobre una placa dos dosis, en gotas, de una suspensión medida de un microorganismo clásico, Escherichia coli, dejando al cultivo crecer durante veinticuatro horas, y determinando después el número de colonias (en millares) del microorganismo que aparecen al final del período. Se quiere comprobar si la calidad del instrumental difiere entre fabricantes.
+
+Supuestos del modelo
+
+* Las cinco muestras representan muestras aleatorias independientes extraídas de I poblaciones seleccionadas aleatoriamente de un conjunto mayor de poblaciones.
+
+* Todas las poblaciones del conjunto más amplio tienen distribución Normal, de modo que cada una de las 5 poblaciones muestreadas se distribuyen según una Normal
+ * Todas las poblaciones del conjunto más amplio tienen la misma varianza, y por lo tanto, cada una de las 5 poblaciones muestreadas tiene también varianza $\sigma^2$.
+
+* Las variables τi son variables aleatorias normales independientes, cada una con media 0 y varianza común $\sigma^2_{\tau}$.
+
+**En el supuesto práctico 2:**
+
+* **Variable respuesta: Calidad_Instrumental**
+
+* **Factor: Fabricante**. Es un factor de efectos aleatorios, se han elegido aleatoriamente a cinco fabricantes, que constituyen únicamente una muestra de todos los fabricantes y el propósito no es comparar estos cinco fabricantes sino contrastar el supuesto general de que la calidad del instrumental difiere entre fabricantes.
+
+* **Modelo equilibrado:** Los niveles de los factores tienen el mismo número de elementos (9 elementos).
+
+* **Tamaño del experimento:** Número total de observaciones, en este caso 45 unidades experimentales.
+
+El problema planteado se modeliza a través de un diseño unifactorial totalmente aleatorizado de efectos aleatorios equilibrado.
+
+```{r}
+bacterias<-read.table('supuesto2.txt', header = TRUE)
+bacterias
+```
+
+Debemos transformar la variable referente a los niveles del factor fijo como factor para poder hacer los cálculos de forma adecuada
+
+```{r}
+bacterias$Fabricante<- factor(bacterias$Fabricante)
+bacterias$Fabricante
+```
+
+Para calcular la tabla ANOVA primero hacemos uso de la función “aov” de la siguiente forma:
+
+```{r}
+mod <- aov(Calidad ~ Fabricante, data = bacterias)
+mod
+```
+
+donde:
+
+* Calidad = nombre de la columna de las observaciones.
+* Fabricante =nombre de la columna en la que están representados los tratamientos.
+* data = data.frame en el que están guardados los datos.
+
+y posteriormente mostramos un resumen de los resultados con la función “summary” (verdadera tabla ANOVA):
+
+```{r}
+# TABLA ANOVA
+summary(mod)   
+```
+
+Esta tabla muestra los resultados del contraste planteado. El valor del estadístico de contraste es igual a **3.976** que deja a la derecha un p-valor de **0.00827**, así que la respuesta dependerá del nivel de significación que se fije. Si fijamos un nivel de significación de 0.05 se concluye que hay evidencia suficiente para afirmar la existencia de alguna variabilidad entre la calidad del material de los diferentes fabricantes. Si fijamos un nivel de significación de 0.001, no podemos hacer tal afirmación.
+
+# Diseño en Bloques Completos Aleatorizados
+
+**Supuesto práctico 3**
+
+Abeto blanco, Abeto del Pirineo, es un árbol de gran belleza por la elegancia de sus formas y el exquisito perfume balsámico que destilan sus hojas y cortezas. Destilando hojas y madera se obtiene aceite de trementina muy utilizado en medicina contra torceduras y contusiones. En estos últimos años se ha observado que la producción de semillas ha descendido y con objeto de conseguir buenas producciones se proponen tres tratamientos. Se observa que árboles diferentes tienen distintas características naturales de reproducción, este efecto de las diferencias entre los árboles se debe de controlar y este control se realiza mediante bloques. En el experimento se utilizan 10 abetos, dentro de cada abeto se seleccionan tres ramas semejantes. Cada rama recibe exactamente uno de los tres tratamientos que son asignados aleatoriamente. Constituyendo cada árbol un bloque completo. Los datos obtenidos se presentan en la siguiente tabla donde se muestra el número de semillas producidas por rama.
+
+
+```{r}
+semillas<-read.table('supuesto3.txt', header = TRUE)
+semillas
+```
+
+A continuación debemos transformar tanto la columna de los tratamientos como la de los bloques en un factor para podemos realizar los cálculos posteriores adecuadamente.
+
+```{r}
+semillas$Tratamiento = factor(semillas$Tratamiento)
+semillas$Tratamiento
+
+semillas$Abeto = factor(semillas$Abeto)
+semillas$Abeto
+
+# Calculando la tabla ANOVA
+mod = aov(y ~ Tratamiento + Abeto, data = semillas);mod
+```
+
+donde:
+
+* **y** es el nombre de la columna de las observaciones
+* **Tratamiento** es el nombre de la columna en la que están representados los tratamientos
+* **Abeto** es el nombre de la columna en la que están representados los bloques
+* **data = data.frame** en el que están guardados los datos
+
+y a continuación mostramos un resumen de los resultados con la función “summary” (verdadera tabla ANOVA):
+
+```{r}
+summary(mod)
+```
+
+La Tabla ANOVA, muestra que:
+
+* El valor del estadístico de contraste de igualdad de bloques, **F = 6.937** deja a su derecha un p-valor menor que **0.001**, menor que el nivel de significación del 5%, por lo que se rechaza la Hipótesis nula de igualdad de bloques. La eficacia de este diseño depende de los efectos de los bloques. Un valor grande de F de los bloques (6.937) implica que el factor bloque tiene un efecto grande. En este caso el diseño es más eficaz que el diseño completamente aleatorizado ya que si el cuadrado medio entre bloques es grande (6.089), el término residual será mucho menor (0.878) y el contraste principal de las medias de los tratamientos será más sensible a las diferencias entre tratamientos. Por lo tanto la inclusión del factor bloque en el modelo es acertada. Así, la producción de semillas depende del abeto.
+Si los efectos de los bloques son muy pequeños, el análisis de bloque quizás no sea necesario y en caso extremo, cuando el valor de F de los bloques es próximo a 1, puede llegar a ser perjudicial, ya que el número de grados de libertad, (I-1)(J-1 ), del denominador de la comparación de tratamientos es menor que el número de grados de libertad correspondiente, IJ-I, en el diseño completamente aleatorizado. Pero, ¿Cómo saber cuándo se puede prescindir de los bloques? La respuesta la tenemos en el valor de la F experimental de los bloques, se ha comprobado que si dicho valor es mayor que 3, no conviene prescindir de los bloques para efectuar los contrastes.
+
+* El valor del estadístico de contraste de igualdad de tratamiento, **F = 9.228** deja a su derecha un p-valor de **0.002**, menor que el nivel de significación del 5%, por lo que se rechaza la Hipótesis nula de igualdad de tratamientos. Así, los tratamientos influyen en el número de semillas. Es decir, existen diferencias significativas en el número de semillas entre los tres tratamientos.
+
+El modelo que hemos propuesto hay que validarlo, para ello hay que comprobar si se verifican los cuatros supuestos expresados anteriormente.
+
+## Estudio de la Idoneidad del modelo
+
+### Hipótesis de aditividad entre los bloques y tratamientos
+
+La interacción entre el factor bloque y los tratamientos vamos a estudiarla analíticamente mediante el Test de Interacción de un grado de Tukey
+
+Para realizar este test en R tenemos que utilizar la library “daewr” y dentro de ella la función “Tukey1df”. De la siguiente forma:
+
+Primero hay que instalar el paquete daewr
+
+Para ello, seleccionar Paquetes/Instalar paquetes y de la lista escoger daewr. O bien utilizar la siguiente orden
+
+```{r}
+#utils:::menuInstallPkgs()
+```
+
+Para realizar este contraste hay que utilizar la libray daewr, para ello realizamos la siguiente orden
+
+```{r}
+library(daewr)
+Tukey1df(semillas)
+```
+Puesto que (Pr<F), no hay suficiente evidencia para aceptar la hipotesis nula
+
+### Hipótesis de Normalidad
+La normalidad las vamos a comprobar analíticamente y gráficamente.
+
+Analíticamente mediante el  contraste de Shapiro-Wilk que es adecuado cuando las muestras son pequeñas (n<50)
+
+```{r}
+shapiro.test(mod$residuals)
+```
+
+Como podemos observar tenemos un p-valor de 0.3935 que aceptaría la hipótesis de normalidad por ser mayor al 5% (nivel de significación usual).
+
+Gráficamente mediante el gráfico probabilístico normal. Para ello utilizamos la orden “qqnorm”
+
+```{r}
+qqnorm(mod$residuals)
+```
+
+En esta gráfica observamos que prácticamente todos los puntos se encuentran sobre la diagonal por lo tanto podemos decir que no muestra una desviación marcada de la normalidad.
+
+### Hipótesis de Homogeneidad de Varianzas
+Para comprobar la hipótesis de homocedasticidad utilizamos el Test de Barlett distinguiendo entre la igualdad entre varianzas del factor principal y la igualdad de varianzas del factor bloque.
+
+En nuestro ejemplo, el test para igualdad de varianzas del factor principal sería:
+
+```{r}
+bartlett.test(semillas$y,semillas$Tratamiento)
+```
+
+El p-valor es del 0.1241 que al ser mayor del nivel significación usual del 5% no podemos rechazar la hipótesis de igualdad de varianzas en el factor principal.
+
+De la misma manera procedemos para el factor bloque:
+
+```{r}
+bartlett.test(semillas$y,semillas$Abeto)
+```
+
+El p-valor es mayor que 0.05 por lo que no podemos rechazar la hipótesis de igualdad de varianzas en el factor bloque.
+
+### Hipótesis de Independencia
+Comprobaremos si se satisface el supuesto de independencia entre los residuos. Para ello tenemos que representar un gráfico de los residuos tipificados frente a los pronosticados. En R obtenemos varios gráficos a la vez que están incluidos en la estimación del modelo.
+
+Para verlos de forma correcta hacemos uso de las siguientes órdenes:
+
+```{r}
+layout(matrix(c(1,2,3,4),2,2))
+plot(mod)
+```
+
+Nos fijamos en el primer gráfico que representa los  residuos frente a los valores ajustados y observamos que no hay ninguna tendencia sistemática. Concluimos que no hay sospechas para que se incumpla la hipótesis de independencia.
+
+## Comparaciones múltiples
+
+Hemos probado anteriormente que se rechaza la Hipótesis nula de igualdad de tratamientos. Así, los tratamientos influyen en el número de semillas. Es decir, existen diferencias significativas en el número de semillas entre los tres tratamientos. Para saber entre que parejas de días estas diferencias son significativas aplicamos una prueba **Post-hoc.**
+
+El contraste de Comparaciones múltiples que vamos a utilizar es el Test de Duncan. Para poder hacer uso de él en R tenemos que instalar en primer lugar el paquete **“agricolae”** y dentro de él la función “duncan.test”.
+
+Destacar que este test hace las comparaciones especificándole si es para el factor principal o el factor bloque.
+
+Comenzamos con el factor principal:
+
+```{r}
+library(agricolae)
+(duncan=duncan.test(mod,"Tratamiento",group=T))
+```
+
+En el apartado “$groups” concluimos que los tres tratamientos difieren significativamente entre sí.
+
+Se observa que la concentración media del número de semillas es mayor con el Tratamiento3 (10.1) y menor con el Tratamiento1 (8.3).
+
+Para el factor bloque:
+
+```{r}
+(duncan=duncan.test(mod, "Abeto" , group = T))
+```
+
+Se observa que la prueba de Duncan ha agrupado los abetos 7, 8, 1, 9, 2, 6 y 10 en un mismo grupo, 1, 9 ,2 6, 10, 3 y 4, en otro grupo y un tercer está formada únicamente por el Abeto5. Inmediatamente se ve que por ejemplo el Abeto5 difiere de todos los demás, siendo en este abeto donde se produce el mayor número de semillas (12.333) y el menor en el Abeto7 (7.333).
+
+# Diseño en bloques Incompletos Aleatorizados 
+
+**Supuesto práctico 4**
+
+Se realiza un estudio para comprobar la efectividad en el retraso del crecimiento de bacterias utilizando cuatro soluciones diferentes para lavar los envases de la leche. El análisis se realiza en el laboratorio y sólo se pueden realizar seis pruebas en un mismo día. Como los días son una fuente de variabilidad potencial, el investigador decide utilizar un diseño aleatorizado por bloques, pero al recopilar las observaciones durante seis días no ha sido posible aplicar todos los tratamientos en cada día, sino que sólo se han podido aplicar dos de las cuatro soluciones cada día. Se decide utilizar un diseño en bloques incompletos balanceado, donde I = 4 y K = 2.
+
+Un posible diseño para estos parámetros lo proporciona la tabla correspondiente al Diseño 5 del Fichero-Adjunto, con R = 3, J = 6 y $\lambda=1$. La disposición del diseño y las observaciones obtenidas se muestran en la siguiente tabla.
+
+\begin{figure}
+  \centering
+    \includegraphics{Captura4.png}
+Tabla 8; Datos del Ejercicio Propuesto 4
+\end{figure}
+
+El objetivo principal es estudiar la efectividad en el retraso del crecimiento de bacterias utilizando cuatro soluciones, por lo que se trata de un factor con cuatro niveles. Sin embrago, como los días son una fuente de variabilidad potencial, consideramos un factor bloque con seis niveles.
+
+* Variable respuesta: Número de bacterias
+
+* Factor: Soluciones que tiene cuatro niveles. Es un factor de efectos fijos ya que viene decidido qué niveles concretos se van a utilizar.
+
+* Bloque: Días que tiene seis niveles. Es un factor de efectos fijos ya que viene decidido qué niveles concretos se van a utilizar.
+
+* Modelo incompleto: Todos los tratamientos no se prueban en cada bloque.
+
+* Tamaño del experimento: Número total de observaciones (12).
+
+Podemos introducir los datos directamente en R de forma manual o introducirlos previamente en un archivo de texto o Excel y leerlos en R.
+
+```{r}
+bacterias<-read.table("bacterias.txt",header = TRUE);bacterias
+```
+
+A continuación debemos transformar tanto la columna de los tratamientos como la de los bloques en un factor para poder realizar los cálculos posteriores adecuadamente.
+
+```{r}
+bacterias$Soluciones=factor(bacterias$Soluciones)
+bacterias$Dias=factor(bacterias$Dias)
+```
+
+Para poder analizar los datos mediante un diseño BIB debemos instalar y cargar dos paquetes de R especializados en este tipo de diseños:
+
+```{r}
+library(daewr)
+library(AlgDesign)
+```
+
+La función **“BIBsize(t , k)”** de la librería daewr nos permite saber si el diseño puede realizarse.  Calcula los parámetros del diseño donde
+
+* t = número de niveles del factor tratamiento.
+
+* k = número de tratamientos por bloque.
+
+Ejecutamos:
+
+```{r}
+BIBsize(t=4,k=2)
+```
+
+El análisis de este modelo lo podemos realizar en R de dos formas:
+
+1. Realizaremos el análisis evaluando primero el efecto de los tratamientos y después el de los bloques utilizando dos funciones
+
+* Para evaluar el efecto de los tratamientos, la suma de cuadrados de tratamientos debe ajustarse por bloques, por lo tanto primero se introducen los bloques y después los tratamientos.
+* Para calcular la tabla ANOVA hacemos uso de la función **“aov” (aov(y ~ A + B, data=mydataframe)** asume suma de cuadrados tipo I) de la siguiente forma:
+
+donde:
+
+* y = nombre de la columna de las observaciones
+* Soluciones = nombre de la columna en la que están representados los tratamientos
+* Dias = nombre de la columna en la que están representados los bloques
+* data = data.frame en el que están guardados los datos
+
+```{r}
+mod1<-aov(y~Dias+Soluciones,data=bacterias);mod1
+
+# resumen con la función summary
+summary(mod1)
+```
+
+El valor del estadístico de contraste de igualdad de Soluciones, F = 0.311, deja a su derecha un p-valor 0.819, mayor que el nivel de significación del 5%, por lo que no se rechaza la Hipótesis Nula de igualdad de tratamientos. Por lo tanto el tipo de solución para lavar los envases de la leche no influye en el retraso del crecimiento de bacterias.
+
+* Para evaluar el efecto de los bloques, la suma de cuadrados de bloques debe ajustarse por los tratamientos, por lo tanto primero se introducen los tratamientos y después los bloques:
+
+```{r}
+mod2<-aov(y ~ Soluciones + Dias, data = bacterias );mod2
+
+summary(mod2)
+```
+
+El valor del estadístico de contraste de igualdad de **Días, F = 0.601**, deja a su derecha un p-valor 0.712, mayor que el nivel de significación del 5%, por lo que no se rechaza la Hipótesis nula de igualdad de bloques. Por lo tanto los días en los que se realiza la prueba para lavar los envases de la leche no influyen en el retraso del crecimiento de bacterias.
+
+2. Realizaremos el análisis evaluando tanto para los tratamientos como para los bloques ejecutando solo una función.
+
+```{r}
+library(car)
+mod3 <- lm(y ~ Soluciones + Dias, data = bacterias);mod3
+
+car::Anova(mod3,type="III")
+```
+
+Los resultados obtenidos coinciden con los realizados primero a los tratamientos y después a los bloques.
+
+# Diseño en Cuadrados Latinos
+
+**Supuesto práctico 5**
+
+Se estudia el rendimiento de un proceso químico en seis tiempos de reposo, A, B, C, D, E y F. Para ello, se consideran seis lotes de materia prima que reaccionan con seis concentraciones de ácido distintas, de manera que cada lote de materia prima en cada concentración de ácido se somete a un tiempo de reposo. Tanto la asignación de los tiempos de reposo a los lotes de materia prima, como la concentración de ácido, se hizo de forma aleatoria. Los datos del rendimiento del proceso químico se muestran en la siguiente tabla.
+
+
+\begin{center}
+\begin{tabular}{| c | c | c | c |c |c |c | }
+\hline
+\multicolumn{7}{ |c| }{Concentraciones de ácido} \\ \hline
+Lote & 1 & 2 & 3 & 4 & 5 & 6 7\\ \hline
+Lote 1 &	12 A &	24 B &	10 C &	18 D &	21 E &	18 F\\
+Lote 2 &	21 B &	26 C &	24 D &	16 E &	20 F &	21 A\\
+Lote 3 &	20 C &	16 D &	19 E &	18 F &	16 A &	19 B\\
+Lote 4 &	22 D &	15 E &	14 F &	19 A &	27 B &	17 C\\
+Lote 5 &	15 E &	13 F &	17 A &	25 B &	21 C &	22 D\\
+Lote 6 &	17 F &	11 A &	12 B &	22 C &	14 D &	20 E\\ \hline
+\end{tabular}
+\end{center}
+
+```{r}
+latino<-read.table("Lotes2.txt",header = TRUE,dec = ",")
+latino
+```
+
+A continuación debemos transformar tanto la columna de los tratamiento como la de los bloques en un factor para podemos realizar los cálculos posteriores adecuadamente.
+
+```{r}
+latino$Lote<-factor(latino$Lote)
+latino$Concentraciones<-factor(latino$Concentraciones)
+latino$Tiempo_de_reposo<-factor(latino$Tiempo_de_reposo)
+```
+
+Para calcular la tabla ANOVA primero hacemos uso de la función “aov” de la siguiente forma:
+
+```{r}
+mod1<-aov(Observaciones~Lote+Concentraciones+Tiempo_de_reposo,data = latino)
+mod1
+
+summary(mod1)
+```
+
+Observando los valores de los p-valores, 0.281, 0.368 y 0.553; mayores respectivamente que el nivel de significación del 5%, deducimos que ningún efecto es significativo.
+
+# Diseño en Cuadrados Greco-Latinos
+
+**Supuesto práctico 6**
+
+Para comprobar el rendimiento de un proceso químico en cinco tiempos de reposo, se consideran cinco lotes de materia prima que reaccionan con cinco concentraciones de ácido distintas a cinco temperaturas distintas, de manera que cada lote de materia prima con cada concentración de ácido y cada temperatura se someten a un tiempo de reposo. Tanto la asignación de los tiempos de reposo a los lotes de materia prima, como las concentraciones de ácido, y las temperaturas, se hizo de forma aleatoria. En este estudio el científico considera que tanto los lotes de materia prima, las concentraciones y las temperaturas pueden influir en el rendimiento del proceso, por lo que los considera como variables de bloque cada una con cinco niveles y decide plantear un diseño por cuadrados greco-latinos como el que muestra en la siguiente tabla.
+
+\begin{center}
+\begin{tabular}{| c | c | c | c |c |c | }
+\hline
+\multicolumn{6}{ |c| }{Rendimiento} \\ \hline
+& \multicolumn{5}{ |c| }{Concentraciones de ácido} \\ \hline
+
+lote & 1 & 2 & 3 & 4 & 5\\ \hline
+lote 1 &  26 A $\alpha$ & 21 B $\beta$ & 19 C $\gamma$ & 13 D $\delta$ & 21 E $\eta$ \\
+lote 2 & 22 B $\gamma$ & 26 C $\delta$ & 24 D $\eta$ & 16 E $\alpha$ & 20 A $\beta$ \\
+lote 3 & 29 C $\eta$ & 26 D $\alpha$ & 19 E $\beta$ & 18 A $\gamma$ & 16 B $\delta$ \\
+lote 4 & 32 D $\beta$ & 15 E $\gamma$ & 14 A $\delta$ & 19 B $\eta$ & 27 C $\alpha$ \\
+lote 5 & 25 E $\delta$ & 18 A $\eta$ & 19 B $\alpha$ & 25 C $\beta$ & 21 D $\gamma$\\ \hline
+\end{tabular}
+Tabla de datos del Supuesto Práctico 6
+\end{center}
+
+
+Tenemos en cuenta que para que el ejercicio esté realizado de forma correcta los datos tienen que estar introducidos tal y como vienen en la imagen, es decir,  las observaciones en una sola columna y a continuación especificado su tratamiento, su bloque correspondiente y después la letra latina y griega correspondiente (En este caso hemos cambiado las letras griegas como las últimas del alfabeto latino por facilidad a la hora de escribirlas).
+
+```{r}
+greco <- read.table("Lotes_2.txt", header = TRUE, dec= ",")
+greco
+```
+
+A continuación debemos transformar tanto la columna de los tratamiento como la de los bloques en un factor para podemos realizar los cálculos posteriores adecuadamente.
+
+Para calcular la tabla ANOVA primero hacemos uso de la función “aov” de la siguiente forma:
+
+```{r}
+greco$Lote <- factor(greco$Lote)
+greco$Temperaturas <- factor(greco$Temperaturas)
+greco$Tiempo_de_reposo <- factor(greco$Tiempo_de_reposo)
+greco$Concentraciones <- factor(greco$Concentraciones)
+mod1 <- aov(Observaciones~ Lote + Concentraciones + Tiempo_de_reposo + Temperaturas, data = greco )
+mod1
+```
+
+donde:
+
+* Observaciones: Nombre de la columna de las observaciones
+* Lote: Nombre de la columna en la que están representados los tratamientos
+* Concentraciones = Nombre de la columna en la que está representado el primer factor bloque
+* Tiempo_de_reposo = Nombre de la columna en la que está representado el segundo factor bloque (letras latinas)
+* Temperaturas: Nombre de la columna en la que está representado el tercer factor bloque
+Data:  data.frame en el que están guardados los datos
+
+y posteriormente mostramos un resumen de los resultados con la función “summary” (verdadera tabla ANOVA):
+
+```{r}
+summary(mod1)
+```
+
+Observando los valores de los p-valores, 0.1988, 0.0825, 0.0420 y 0.9349, deducimos que el único efecto significativo, al nivel de significación del 5%, es el efecto de las distintas concentraciones sobre el rendimiento del proceso químico.
+
+# Diseño en Cuadrados de Youden
+
+**Supuesto práctico 7**
+
+Consideremos de nuevo el experimento sobre el rendimiento de un proceso químico en el que se está interesado en estudiar seis tiempos de reposo, A, B, C, D, E y F y se desea eliminar estadísticamente el efecto de los lotes materia prima y de las concentraciones de ácido distintas. Pero supongamos que sólo se dispone de cinco tipos de concentraciones. Para analizar este experimento se decidió utilizar un cuadrado de Youden con seis filas (los lotes de materia prima), cinco columnas (las distintas concentraciones) y seis letras latinas (los tiempos de reposo). Los datos correspondientes se muestran en la siguiente tabla.
+
+\begin{figure}
+  \centering
+    \includegraphics{Captura5.png}
+Tabla 8; Tabla de datos del Supuesto Práctico 7.
+\end{figure}
+
+Tenemos en cuenta que para que el ejercicio esté realizado de forma correcta los datos tienen que estar introducidos tal y como vienen en la imagen, es decir, las observaciones en una sola columna y a continuación especificado su tratamiento, su bloque correspondiente y después la letra latina correspondiente.
+
+```{r}
+youden <- read.table("Lotes3.txt", header = TRUE)
+youden
+```
+
+
+A continuación debemos transformar tanto la columna de los tratamiento como la de los bloques en un factor para podemos realizar los cálculos posteriores adecuadamente.
+
+```{r}
+youden$Lote <- factor(youden$Lote)
+youden$Concentraciones <- factor(youden$Concentraciones)
+youden$Tiempo_de_reposo <- factor(youden$Tiempo_de_reposo)
+```
+
+Para cada factor realizamos una tabla ANOVA:
+
+* **Factor principal:**
+
+Para evaluar el efecto de los tratamientos, la suma de cuadrados de tratamientos debe ajustarse por bloques, por lo tanto primero se introducen los bloques y después los tratamientos.
+
+Para calcular la tabla ANOVA hacemos uso de la función “aov” (asume suma de cuadrados tipo I) de la siguiente forma:
+
+```{r}
+mod1 <- aov(Observaciones~ Tiempo_de_reposo + Lote + Concentraciones, data = youden )
+mod1
+summary(mod1)
+```
+
+El  p-valor, **0.532**, es mayor que el nivel de significación del 5%, deducimos que el **factor principal: Concentraciones  no es significativo.**
+
+* **Factor Bloque: Lotes.**
+Para evaluar el efecto del primero de los bloques, la suma de cuadrados de bloques debe ajustarse por los tratamientos, por lo tanto primero se introducen los tratamientos y después los bloques:
+
+```{r}
+mod2 <- aov(Observaciones~ Concentraciones  +Tiempo_de_reposo + Lote , data = youden )
+mod2
+summary(mod2)
+```
+
+El  p-valor, **0.356**, es mayor que el nivel de significación del 5%, deducimos que el **Factor Bloque: Lotes no es significativo.**
+
+* **Factor Bloque:Tiempo_de_reposo**
+Para evaluar el efecto del segundo bloque, la suma de cuadrados de bloques debe ajustarse también por los tratamientos, por lo tanto primero se introducen los tratamientos y después los bloques:
+
+```{r}
+mod3 <- aov(Observaciones~ Concentraciones  + Lote +Tiempo_de_reposo , data = youden )
+mod3
+summary(mod3)
+```
+
+El p-valor es **0.213**; mayor que el nivel de significación del 5%, deducimos que Factor **Bloque:Tiempo_de_reposo no es significativo.**
+
+# Diseñp Factoriales
+
+## Diseños factoriales con dos factores
+
+En primer lugar vamos a estudiar los diseños más simples, es decir aquellos en los que intervienen sólo dos factores. Supongamos que hay a niveles para el factor A y b niveles del factor B, cada réplica del experimento contiene todas las posibles combinaciones de tratamientos, es decir contiene los ab tratamientos posibles.
+
+### El modelo sin replicación
+El modelo estadístico para este diseño es:
+
+\begin{center}
+
+$$y_{ij}=\mu+\tau_{i}+\beta_{j}+(\tau\beta)_{ij}+u_{ij}, \hspace{5mm} i=1,...,a;\hspace{2mm}j=1,...,b$$
+Expresión 16: Modelo estadísticodel diseño factorial de dos factores sin replicación
+\end{center}
+
+Donde:
+
+* $y_{ij}$: Representa la observación correspondiente al nivel (i) del factor A y al nivel (j) del factor B.
+* $\mu$: Efecto constante, común a todos los niveles de los factores, denominado media global.
+* $\tau_i$: Efecto producido por el nivel i-ésimo del factor A,  $(\sum_i \tau_i= 0)$.
+* $\beta_j$: Efecto producido por el nivel j-ésimo del factor B,  $(\sum_j \beta_i= 0)$.
+* $(\tau\beta)_{ij}$: Efecto producido por la interacción entre $A\times B$, $\sum_i( \tau\beta)_{ij}= \sum_j( \tau\beta)_{ij})=0$.
+* $u_{ij}$ son vv aa. independientes con distribución $N(0,\sigma)$.
+
+**Supuesto práctico 8**
+
+En unos laboratorios se está investigando sobre el tiempo de supervivencia de unos animales a los que se les suministra al azar tres tipos de venenos y cuatro antídotos distintos. Se pretende estudiar si los tiempos de supervivencia de los anímales varían en función de las combinaciones veneno-antídoto. Los datos que se recogen en la tabla adjunta son los tiempos de supervivencia en horas.
+
+\begin{figure}
+  \centering
+    \includegraphics{Captura6.png}
+Tabla 17; Tabla de datos del Supuesto Práctico 8.
+\end{figure}
+
+El objetivo principal es estudiar la influencia de tres tipos de venenos y 4 tipos de antídotos en el tiempo de supervivencia de unos determinados animales, por lo que se trata de un modelo con dos factores: el veneno (con tres niveles) y el antídoto (con cuatro niveles). La variable que va a medir las diferencias entre los tratamientos es el tiempo que sobreviven los animales. Se combinan todos los niveles de los dos factores por lo que tenemos en total doce tratamientos.
+
+Tenemos en cuenta que para que el ejercicio esté realizado de forma correcta los datos tienen que estar introducidos tal y como vienen en la imagen, es decir, las observaciones en una sola columna y a continuación especificado sus factores correspondientes.
+
+```{r}
+factorial <- read.table("laboratorio.txt", header = TRUE)
+factorial
+```
+
+A continuación debemos transformar todas las columnas que contienen a los factores en un factor para podemos realizar los cálculos posteriores adecuadamente.
+
+```{r}
+factorial$Antidoto <- factor(factorial$Antidoto)
+factorial$Veneno <- factor(factorial$Veneno)
+```
+
+Para calcular la tabla ANOVA primero hacemos uso de la función “aov” de la siguiente forma
+
+```{r}
+mod <- aov(Tiempo~ Veneno + Antidoto , data = factorial )
+mod
+
+summary(mod)
+```
+
+Esta Tabla ANOVA recoge la descomposición de la varianza considerando como fuente de variación los doce tratamientos o grupos que se forman al combinar los niveles de los dos factores. Mediante esta tabla se puede estudiar sí varían los tiempos que sobreviven los animales en función de las combinaciones veneno-antídoto. Es decir, se pueden estudiar si existen diferencias significativas entre los tiempos medios de supervivencia con los distintos tipos de venenos y antídotos, pero no se puede estudiar si la efectividad de los antídotos es la misma para todos los venenos. Observando los p-valores, **0.084 y 0.099**; mayores respectivamente que el nivel de significación del 5%, deducimos que ningún efecto es significativo. Por lo tanto, no existen diferencias en los tiempos medios de supervivencia de los animales, en función de la pareja veneno-antídoto que se les suministra.
+
+### El modelo con replicación
+El modelo estadístico para este diseño es:
+
+\begin{center}
+
+$$y_{ijk}=\mu+\tau_{i}+\beta_{j}+(\tau\beta)_{ij}+u_{ijk}, \hspace{5mm} i=1,...,a;\hspace{2mm}j=1,...,b; \hspace{5mm}k=1,...,r$$
+Expresión 17: Modelo estadísticodel diseño factorial de dos factores con replicación
+\end{center}
+
+**Supuesto práctico 9**
+
+Consideremos el supuesto práctico anterior en el que realizamos dos réplicas por cada tratamiento. Los datos que se recogen en la tabla adjunta son los tiempos de supervivencia en horas de unos animales a los que se les suministra al azar tres venenos y cuatro antídotos. El objetivo es estudiar qué antídoto es el adecuado para cada veneno.
+
+\begin{figure}
+  \centering
+    \includegraphics{Captura7.png}
+Tabla 19; Tabla de datos del Supuesto Práctico 9.
+\end{figure}
+
+enemos en cuenta que para que el ejercicio esté realizado de forma correcta los datos tienen que estar introducidos tal y como vienen en la imagen, es decir, las observaciones en una sola columna y a continuación especificado sus factores correspondientes.
+
+```{r}
+factorial <- read.table("laboratorio2.txt", header = TRUE)
+factorial
+```
+
+A continuación debemos transformar todas las columnas que contienen a los factores en un factor para podemos realizar los cálculos posteriores adecuadamente.
+
+```{r}
+factorial$Veneno <- factor(factorial$Veneno)
+factorial$Antidoto <- factor(factorial$Antidoto)
+```
+
+Para calcular la tabla ANOVA primero hacemos uso de la función “aov” de la siguiente forma:
+
+```{r}
+mod <- aov(Tiempo~ Veneno * Antidoto , data = factorial )
+mod
+summary(mod)
+```
+
+La Tabla ANOVA muestra las filas de Tipo_veneno, Tipo_antídoto y Tipo_veneno*Tipo_antídoto que corresponde a la variabilidad debida a los efectos de cada uno de los factores y de la interacción entre ambos.
+
+Las preguntas que nos planteamos son: ¿Los venenos son igual de peligrosos? ¿Y los antídotos son igual de efectivos? La efectividad de los antídotos, ¿es la misma para todos los venenos? Para responder a estas preguntas, comenzamos comprobando si el efecto de los antídotos es el mismo para todos los venenos. Para ello observamos el valor del estadístico (Fexp= 0.761) que contrasta la hipótesis correspondiente a la interacción entre ambos factores $(H0: (\tau\beta)_{ij} = 0)$. Dicho valor deja a la derecha un Sig. = 0.614, mayor que el nivel de significación 0.05. Por lo tanto la interacción entre ambos factores no es significativa y debemos eliminarla del modelo. Construimos de nuevo la Tabla ANOVA en la que sólo figurarán los efectos principales
+
+```{r}
+mod <- aov(Tiempo~ Veneno + Antidoto , data = factorial )
+mod
+summary(mod)
+```
+
+Esta tabla muestra dos únicas fuentes de variación, lo efectos principales de los dos factores (Tipo_veneno y Tipo_antídoto), y se ha suprimido la interacción entre ambos. Se observa que el valor de la Suma de Cuadrados del error de este modelo (73.873) se ha formado con los valores de las Sumas de cuadrados del error y de la interacción del modelo anterior (20.363 + 53.510 = 73.873). Observando los valores de los p-valores, 0.0046 y 0.0117 asociados a los contrastes principales, se deduce que los dos efectos son significativos a un nivel de significación del 5%. Deducimos que ni la gravedad de los venenos es la misma, ni la efectividad de los antídotos, pero dicha efectividad no depende del tipo de veneno con el que se administre ya que la interacción no es significativa.
+
+## Diseños factoriales con tres factores
+
+### El modelo sin replicación
+
+**Supuesto práctico 10**
+
+En una fábrica de refrescos está haciendo unos estudios en la planta embotelladora. El objetivo es obtener más uniformidad en el llenado de las botellas. La máquina de llenado teóricamente llena cada botella a la altura correcta, pero en la práctica hay variación, y la embotelladora desea entender mejor las fuentes de esta variabilidad para eventualmente reducirla. En el proceso se pueden controlar tres factores durante el proceso de llenado: El % de carbonato (factor A), la presión del llenado (factor B) y el número de botellas llenadas por minuto que llamaremos velocidad de la línea (factor C). Se consideran tres niveles para el factor A (10%, 12%, 14%), dos niveles para el factor B (25psi, 30psi) y dos niveles para el factor C (200bpm, 250bpm). Los datos recogidos de la desviación de la altura objetivo se muestran en la tabla adjunta
+
+\begin{figure}
+  \centering
+    \includegraphics{Captura8.png}
+Tabla 22; Tabla de datos del Supuesto Práctico 10.
+\end{figure}
+
+Tenemos en cuenta que para que el ejercicio esté realizado de forma correcta los datos tienen que estar introducidos tal y como vienen en la imagen, es decir, las observaciones en una sola columna y a continuación especificado sus factores correspondientes.
+
+```{r}
+factorial <- read.table("embotelladora.txt", header = TRUE)
+factorial
+```
+
+A continuación debemos transformar la tres columnas en factores para poder realizar los cálculos posteriores adecuadamente.
+
+```{r}
+factorial$Carbono <- factor(factorial$Carbono)
+factorial$Velocidad <- factor(factorial$Velocidad)
+factorial$Presion <- factor(factorial$Presion)
+```
+
+Para calcular la tabla ANOVA primero hacemos uso de la función “aov” de la siguiente forma:
+
+```{r}
+mod <- aov(Altura~ Carbono + Presion + Velocidad + Carbono*Presion + 
+             Carbono*Velocidad + Presion*Velocidad , data = factorial )
+mod
+```
+
+donde:
+
+* **Altura:** Nombre de la columna de las observaciones
+* **Carbono:** Nombre de la columna en la que está representado el primer factor
+* **Presion:** Nombre de la columna en la que está representado el segundo factor
+* **Velocidad:** Nombre de la columna en la que está representado el tercer factor
+* **Carbono*Presion, Carbono$\times$Velocidad y Presion* **Velocidad hace referencia a las distintas interacciones.
+
+data= data.frame en el que están guardados los datos
+
+```{r}
+summary(mod)
+```
+
+La Tabla ANOVA muestra las filas de Carbono, Presión, Velocidad, Carbono* Presión, Carbono* Velocidad y Presión* Velocidad que corresponden a la variabilidad debida a los efectos de cada uno de los factores y a las interacciones de orden dos entre ambos. En dicha Tabla se indica que para un nivel de significación del 5% los efectos que no son significativos del modelo planteado son las interacciones entre los factores Carbono* Presión y Presión*Velocidad ya que los p-valores correspondientes a estos efectos son 0.125 y 0.057 mayores que el nivel de significación.
+
+donde los efectos deben cumplir las condiciones expuestas anteriormente. Para resolverlo suprimimos la interacción Carbono* Presión. La tabla ANOVA que corresponde a este modelo es la siguiente:
+
+```{r}
+mod <- aov(Altura~ Carbono + Presion + Velocidad + Carbono*Velocidad + 
+             Presion*Velocidad , data = factorial )
+summary(mod)
+```
+
+Todos los efectos de este último modelo planteado son significativos y por lo tanto es en este modelo donde vamos a realizar el estudio. Existen diferencias significativas entre los distintos porcentajes del Carbono, los dos tipos de presión, las dos velocidades de llenado y la interacción entre el porcentaje de Carbono y la Velocidad de llenado.
+
+## Diseño factorial de tres factores con replicación
+
+**Supuesto práctico 11**
+
+Consideremos el supuesto práctico anterior en el que realizamos dos réplicas por cada tratamiento. En la Tabla adjunta se muestran los datos recogidos de la desviación de la altura objetivo de las botellas de refresco. En el proceso de llenado, la embotelladora puede controlar tres factores durante el proceso: El porcentaje de carbonato (factor A) con tres niveles (10%, 12%, 14%), la presión del llenado (factor B) con dos niveles (25psi, 30psi) y el número de botellas llenadas por minuto que llamaremos velocidad de la línea (factor C) con dos niveles (200bpm, 250bpm).
+
+\begin{figure}
+  \centering
+    \includegraphics{Captura9.png}
+Tabla 24; Tabla de datos del Supuesto Práctico 11.
+\end{figure}
+
+La variable respuesta de este experimento es la Desviación que se produce de la altura objetivo en el llenado en las botellas de refresco. Los factores son: Porcentaje de Carbono que presenta tres niveles 10%, 12% y 14%; Presión, con dos niveles 25 psi y 30 psi y Velocidad, con dos niveles 200 y 250. Los niveles de los factores han sido fijados por el experimentador, por lo que todos los factores son de efectos fijos. Se trata de un diseño trifactorial de efectos fijos, donde el número de tratamientos es $3\times2\times2 = 12$ y el número de observaciones 24.
+
+```{r}
+factorial <- read.table("embotelladora2.txt", header = TRUE)
+factorial
+```
+
+A continuación debemos transformar las tres columnas en factores para poder realizar los cálculos posteriores adecuadamente.
+
+```{r}
+factorial$Carbono <- factor(factorial$Carbono)
+factorial$Velocidad <- factor(factorial$Velocidad)
+factorial$Presion <- factor(factorial$Presion)
+```
+
+Para calcular la tabla ANOVA primero hacemos uso de la función “aov” de la siguiente forma:
+
+```{r}
+mod <- aov(Altura~ Carbono + Presion + Velocidad + Carbono*Presion + 
+             Carbono*Velocidad + Presion*Velocidad + Carbono*Velocidad*Presion, 
+           data = factorial )
+
+summary(mod)
+```
+
+donde:
+
+* **Altura:** Nombre de la columna de las observaciones
+* **Carbono:** Nombre de la columna en la que está representado el primer factor
+* **Presion:** Nombre de la columna en la que está representado el segundo factor
+* **Velocidad:** Nombre de la columna en la que está representado el tercer factor
+* **Carbono$\times$Presion, Carbono$\times$Velocidad, Presion$\times$Velocidad y Carbono$\times$Velocidad**Presion hace referencia a las distintas interacciones.
+* data= data.frame en el que están guardados los datos
+
+La Tabla ANOVA muestra las filas de Carbono, Presión, Velocidad, Carbono* Presión, Carbono* Velocidad, Presión* Velocidad y Carbono* Presión* Velocidad que corresponden a la variabilidad debida a los efectos de cada uno de los factores, a las interacciones de orden dos y orden tres entre los factores. En dicha Tabla se indica que para un nivel de significación del 5% los efectos que no son significativos del modelo planteado son las interacciones entre los factores, Carbono* Presión y Presión* Velocidad y Carbono* Presión* Velocidad ya que los p-valores correspondientes a estos efectos son **0.425, 0.668 y 0.894** mayores que el nivel de significación.
+
+Para resolverlo suprimimos la interacción Carbono* Presión* Velocidad. La tabla ANOVA que corresponde a este modelo es la siguiente:
+
+```{r}
+mod <- aov(Altura~ Carbono + Presion + Velocidad + Carbono*Presion + 
+             Carbono*Velocidad + Presion*Velocidad, data = factorial )
+summary(mod)
+```
+
+Los efectos Carbono* Presión y Presión* Velocidad siguen siendo no significativos.
+
+Para resolverlo suprimimos la interacción Presión* Velocidad. La tabla ANOVA que corresponde a este modelo es la siguiente:
+
+```{r}
+mod <- aov(Altura~ Carbono + Presion + Velocidad + Carbono*Presion + 
+             Carbono*Velocidad, data = factorial )
+summary(mod)
+```
+
+El efecto Carbono* Presión sigue siendo no significativo por lo tanto lo suprimimos y replanteamos el siguiente modelo matemático
+
+```{r}
+mod <- aov(Altura~ Carbono + Presion + Velocidad +  Carbono*Velocidad, 
+           data = factorial )
+summary(mod)
+```
+
+Todos los efectos de este último modelo planteado son significativos y por lo tanto es en este modelo donde vamos a realizar el estudio. Existen diferencias significativas entre los distintos porcentajes del Carbono, los dos tipos de presión, las dos velocidades de llenado y la interacción entre el porcentaje de **Carbono y la Velocidad** de llenado.
+
+# Ejercicios Guiados
+
+
+
+
+
+
+
+
+
+
+
