@@ -230,7 +230,7 @@ Supuestos del modelo
 * Todas las poblaciones del conjunto más amplio tienen distribución Normal, de modo que cada una de las 5 poblaciones muestreadas se distribuyen según una Normal
  * Todas las poblaciones del conjunto más amplio tienen la misma varianza, y por lo tanto, cada una de las 5 poblaciones muestreadas tiene también varianza $\sigma^2$.
 
-* Las variables τi son variables aleatorias normales independientes, cada una con media 0 y varianza común $\sigma^2_{\tau}$.
+* Las variables $\tau_i$ son variables aleatorias normales independientes, cada una con media 0 y varianza común $\sigma^2_{\tau}$.
 
 **En el supuesto práctico 2:**
 
@@ -954,13 +954,419 @@ Todos los efectos de este último modelo planteado son significativos y por lo t
 
 # Ejercicios Guiados
 
+**Ejercicio Guiado 1**
+
+Se realiza un estudio del contenido de azufre en cinco yacimientos de carbón. Se toman muestras aleatoriamente de cada uno de los yacimientos y se analizan. Los datos del porcentaje de azufre por muestra se indican en la tabla adjunta.
+
+\begin{center}
+\begin{tabular}{| c | c | }
+\hline
+Yacimientos & Porcentaje de azufre \\ \hline
+1 & 151   192   108   204   214   176   117           \\
+2 & 169   64    90    141   101   128   159   156       \\
+3 & 122   132   139   133   154   104   225   149   130\\
+4 & 75    126   69    62    90    120   32    73        \\
+5 & 80    90    124   82    72    57    118   54    130\\ \hline
+\end{tabular}
+\end{center}
+
+Para un nivel de significación del 5%.
+
+1. ¿Se puede confirmar que el porcentaje de azufre es el mismo en los cinco yacimientos?
+2. Si se rechaza la hipótesis nula que las medias de porcentaje de azufre en los cinco yacimientos es la misma, determinar que medias difieren entre sí utilizando el método de comparaciones múltiples de Tukey.
+3. Estudiar las hipótesis de modelo: Homocedasticidad (Homogeneidad de las varianzas por grupo), Independencia y Normalidad.
+
+**Solución**
+
+1. 
+
+El problema planteado se modeliza a través de un **diseño unifactorial totalmente aleatorizado de efectos fijos no-equilibrado.**
+
+* **Variable respuesta: Contenido de Azufre**
+* **Factor:** Tipo de yacimiento con cinco niveles. Es un factor de Efectos fijos ya que viene decidido qué niveles concretos se van a utilizar 
+* **Modelo no-equilibrado:** Los niveles de los factores tienen distinto número de elementos
+* **Tamaño del experimento:** Número total de observaciones, en este caso 41 unidades experimentales.
+
+```{r}
+porcentaje <- read.table("guiado1.txt", header = TRUE)
+porcentaje
+```
+
+Debemos transformar la variable referente a los niveles del factor fijo como factor para poder hacer los cálculos de forma adecuada:
+
+```{r}
+porcentaje$Yacimiento<-factor(porcentaje$Yacimiento)
+porcentaje$Yacimiento
+```
+
+Para calcular la tabla ANOVA primero hacemos uso de la función “aov” de la siguiente forma:
+
+```{r}
+mod <- aov(Azufre ~ Yacimiento, data = porcentaje);mod
+
+summary(mod)
+```
+
+En la Tabla ANOVA, el valor del estadístico de contraste de igualdad de medias, **F = 8.534** deja a su derecha un p-valor menor que 0.001, menor que el nivel de significación del 5%, por lo que se rechaza la Hipótesis nula de igualdad de medias. Es decir, existen diferencias significativas en el contenido medio de azufre entre los cinco yacimientos. La pregunta que nos planteamos es si el contenido de azufre es significativamente distinto en los cinco yacimientos o sólo en alguno de ellos. Para responder a esta pregunta utilizamos algún procedimiento de comparaciones múltiples. En el apartado siguiente responderemos a esta cuestión.
+
+2. 
+
+```{r}
+mod.tukey <- TukeyHSD(mod, ordered = TRUE)
+mod.tukey
+```
+
+Se comprueba que no se detectan diferencias significativas entre los yacimientos 1, 2 y 3 y entre los yacimientos 2, 4 y 5. Para ello nos fijamos en las Significaciones (mayores que 0.05) o en los límites de los intervalos. Dos medias se declaran iguales si el cero pertenece al intervalo de confianza construido para la diferencia de ellas.
+
+3. 
+
+**Hipótesis de Homocedasticidad: Test de Barlett**
+
+```{r}
+bartlett.test(porcentaje$Azufre, porcentaje$Yacimiento)
+```
+
+La salida muestra el resultado del contraste de Barlett de igualdad de varianzas en todos los grupos. El estadístico de contraste experimental, **B= 1.2655**, deja a la derecha un **p-valor = 0.8672**, que nos indica que no se debe rechazar la igualdad entre las varianzas.
+
+**Hipótesis de Independencia:** Esta hipótesis la comprobaremos gráficamente mediante la representación de los residuos frente a los valores pronosticados por el modelo.
+
+```{r}
+layout(matrix(c(1,2,3,4),2,2))
+plot(mod)
+```
+
+En esta salida interpretamos el gráfico que se muestra en la Fila 1, Columna 1. Es decir, el gráfico el que se representan los residuos en el eje de ordenadas y los valores ajustados por el modelo en el eje de abscisas. Este gráfico no muestra ningún aspecto que haga sospechar de la hipótesis de independencia de los residuos.
+
+La hipótesis de Normalidad la comprobaremos gráficamente y analíticamente
+
+Gráficamente comprobaremos la normalidad mediante un histograma y el gráfico Q-Q plot
+
+En primer lugar realizaremos el histograma, para ello
+
+En primer lugar calculemos los residuos del modelo
+
+```{r}
+g = mod$residuals;g
+```
+
+Calculamos la media de los residuos
+```{r}
+m<-mean(g);m
+```
+
+Calculamos la desviación típica
+```{r}
+std<-sqrt(var(g));std
+```
+
+Representamos el histograma
+```{r}
+hist(g, prob = TRUE, xlab ="Residuos", ylim = c(0, 0.025), main = 
+       "F. dens. Normal hist. de residuos")
+
+#Y la curma Normal sobre el Histograma
+
+curve(dnorm(x, mean = m, sd = std), col ="darkblue", lwd =2, add = TRUE, yaxt ="n")
+```
+
+Anteriormete hemos realizado el gráfico Q-Q. Ambos gráficos no muestran desviación importante de la normalidad.
+
+Analíticamente lo vamos a comprobar mediante el contraste de **Shapiro-Wilk**
+
+```{r}
+shapiro.test(mod$residuals)
+```
+
+El valor del p-valor (Sig. asintót. (bilateral)) es de **0.6384**, por lo tanto no podemos rechazar la hipótesis de normalidad.
 
 
+**Ejercicio Guiado 2**
 
+Se realiza un estudio sobre el efecto del fotoperiodo y del genotipo en el periodo latente de infección del moho de cebada aislado AB3. Se obtienen cincuenta hojas de cuatro genotipos distintos. Cada grupo es infectado y posteriormente expuesto a diferente fotoperiodo. Los distintos fotoperiodos se trataron como bloques y se obtuvieron los siguientes datos de los totales para los bloques y tratamientos. La respuesta anotada es el número de días hasta la aparición de síntomas visibles.
 
+\begin{center}
+\begin{tabular}{| c | c | c | c | c | c | }
+\hline
+& \multicolumn{5}{ |c| }{Fotoperiodo (horas de oscuridad por ciclo de 24 horas)} \\ \hline
+Genotipo & 0 & 2 & 4 & 8 &  16\\ \hline
+Armelle & 630 & 610 & 560 & 570 & 590\\
+Golden &  640 & 630  &  600 & 620  &  620\\
+Promise & 640  &  630 & 650  &  620 & 580\\
+Emir &  660 & 660  &  620 & 610  & 630\\ \hline
+\end{tabular}
+\end{center}
 
+1. ¿Se puede afirmar que los diferentes genotipos no influyen en el número de días hasta la aparición de la infección? ¿Se puede concluir que los distintos fotoperiodos no afectan al tiempo de aparición de los síntomas de infección del moho?
+2. En caso de que influyan significativamente alguno de los dos factores, extraer conclusiones utilizando el método de Duncan.
+3. Estudiar las hipótesis de modelo: Homocedasticidad, Independencia y Normalidad.
 
+**Solución**
 
+1. 
 
+En este caso se trata de un diseño en bloques completos aleatorizados. El objetivo del estudio es comparar los cuatro tipos de genotipos, por lo que se trata de un factor con cuatro niveles. Sin embargo, al realizar la medición con los distintos fotoperiodos a los que son expuestos el moho de cebada, es posible que estos influyan sobre el periodo latente de infección del moho de cebada aislado AB3. Por ello, y al no ser directamente motivo de estudio, los fotoperiodos es un factor secundario que recibe el nombre de bloque.
 
+```{r}
+dias<-read.table("guiado2.txt", header = TRUE)
+dias
+```
 
+A continuación debemos transformar tanto la columna de los tratamientos como la de los bloques en un factor para realizar los cálculos posteriores adecuadamente.
+
+```{r}
+dias$Fotoperiodo = factor(dias$Fotoperiodo);dias$Fotoperiodo
+
+dias$Genotipo = factor(dias$Genotipo);dias$Genotipo
+
+# ANOVA
+mod = aov(Dias ~ Fotoperiodo + Genotipo, data = dias);mod
+
+summary(mod)
+```
+
+En la Tabla ANOVA, el valor del estadístico de contraste de igualdad de medias de tratamientos, **F = 5.041** deja a su derecha un p-valor igual a **0.017**, menor que el nivel de significación del 5%, por lo que se rechaza la Hipótesis nula de igualdad de medias de tratamientos. Es decir, existen diferencias significativas en el número de días hasta la aparición de la infección entre los cuatro genotipos.
+
+En esta Tabla ANOVA, también se observa que el valor del estadístico de contraste de igualdad de medias de bloques, **F = 3.619** deja a su derecha un p-valor igual a **0.037**, menor que el nivel de significación del 5%, por lo que se rechaza la Hipótesis nula de igualdad de medias de bloques. Es decir, existen diferencias significativas en el número de días hasta la aparición de la infección entre los cinco tipos de fotoperiodos. Por lo tanto, se concluye que los niveles de ambos factores influyen de forma significativa en el número de días hasta la aparición de los síntomas de infección del moho.
+
+2. 
+
+**Primero vamos a hacer el contraste de Duncan para los tratamientos: Genotipos**
+
+```{r}
+library(agricolae)
+duncan <-duncan.test(mod, "Genotipo", main= "Número de días con diferentes genotipos ")
+duncan
+```
+
+En la tabla del factor Tipo de genotipo hay dos subconjuntos que se diferencian entre sí; el subconjunto 1 está formado por las medias del genotipo Armelle y el subconjunto 2 por las medias de los genotipos Golden, Promise y Emir. Y dentro de cada subconjunto no se aprecian diferencias significativas entre las medias. También se observa que en el genotipo Emir se produce el mayor número medio de días hasta la aparición de la infección (636) y en el genotipo Armelle se produce el menor (592).
+
+**Segundo vamos a hacer el contraste de Duncan para los bloques: Fotoperiodos**
+
+```{r}
+duncan1 <-duncan.test(mod,"Fotoperiodo",  main= 
+                        "Número de días con diferentes fotoperiodos")
+duncan1
+```
+
+En la tabla del factor Tipo de fotoperiodo hay dos subconjuntos que se diferencian entre sí; el subconjunto 1 está formado por las medias de los Fotoperiodos 0 y 2 y el subconjunto 2 por las medias de los fotoperiodos 2, 4, 8 y 16. Y dentro de cada subconjunto no se aprecian diferencias significativas entre las medias. También se observa que en el fotoperiodo 0 se produce el mayor número medio de días hasta la aparición de la infección (642.5) y en los fotoperiodos 8 y 16 se produce el menor
+
+3. 
+
+**Estudiamos la homocedasticidad mediante el test de Barlett**
+
+```{r}
+bartlett.test(dias$Dias,  dias$Fotoperiodo)
+bartlett.test(dias$Dias,  dias$Genotipo)
+```
+
+Las Tablas muestran los resultados del contraste de Barlett de igualdad de varianzas en todos los grupos del factor genotipo y en todos los grupos del factor Fotoperiodo. Los P-valores, 0.5474 y 0.6537 indican que indican que no se debe rechazar la igualdad entre las varianzas ni el factor genotipo ni el factor fotoperiodo.
+
+**Estudiamos la independencia gráficamente**
+
+```{r}
+layout(matrix(c(1,2,3,4),2,2))
+plot(mod)
+```
+
+**Estudiamos la Normalidad gráficamente mediante el gráfico probabilístico normal y analíticamente mediante el contraste de Shapiro-Wilk**
+
+Observamos el gráfico que se muestra en la Fila 2, Columna1. Es decir, el gráfico el que se representan los residuos estandarizados en el eje de ordenadas y cuantiles teóricos en el eje de abscisas. En dicho gráfico se aprecian desviaciones a la normalidad, pero el contraste ANOVA es robusto frente a desviaciones pequeñas de la normalidad. Realizaremos a continuación el contraste de Shapiro-Wilk para comprobar analíticamente la normalidad de los residuos.
+
+```{r}
+shapiro.test(mod$residuals)
+```
+
+El valor del p-valor es de 0.4176, no pudiéndose rechazar la hipótesis de normalidad.
+
+**Ejercicio Guiado 3**
+
+Se realiza un estudio para determinar el efecto del nivel del agua y del tipo de planta sobre la longitud global del tallo de las plantas de guisantes. Para ello, se utilizan tres niveles de agua (bajo, medio y alto) y dos tipos de plantas (sin hojas y convencional). Se dispone para el estudio de dieciocho plantas sin hojas y dieciocho plantas convencionales. Se dividen aleatoriamente los dos tipos de plantas en tres subgrupos y después se asignan los niveles de agua aleatoriamente a los dos grupos de plantas. Los datos sobre la longitud del tallo de los guisantes (en centímetros) se muestran en la siguiente tabla:
+
+\begin{figure}
+  \centering
+    \includegraphics{Captura10.png}
+\end{figure}
+
+Para un nivel de significación del 5%.
+
+1. ¿Se puede afirmar que los distintos niveles de agua influyen en la longitud del tallo de los guisantes? ¿Y el tipo de planta?
+2. ¿La efectividad del nivel del agua es la misma para los dos tipos de plantas?
+3. Estudia, utilizando el método de Newman-Keuls, qué nivel de agua es más efectivo.
+
+**Solución**
+
+1.
+
+El problema planteado se modeliza a través de un ‘diseño de dos factores con replicación.
+```{r}
+factorial<-read.table("guiado3.txt", header = TRUE)
+factorial
+```
+
+A continuación debemos transformar todas las columnas que contienen a los factores en un factor para poder realizar los cálculos posteriores adecuadamente.
+
+```{r}
+factorial$agua <- factor(factorial$Nivel_agua);factorial$agua
+
+factorial$planta <- factor(factorial$Tipo_planta);factorial$planta
+```
+
+Para responder a este apartado debe resolverse el contraste de igualdad de medias para el factor A:
+$H_0=\mu1=\mu2=\mu3=\mu$ vs $H_1=\mu i\ne\mu j$ para algún $i\ne j$
+
+y para el factor B:
+$H_0=\mu1=\mu2==\mu$ vs $H_1=\mu i\ne\mu j$ para algún $i\ne j$
+
+```{r}
+mod  =  aov(Longitud_tallo ~  agua* planta , data = factorial )
+mod
+summary(mod)
+```
+
+* El valor del estadístico de contraste de igualdad de medias del factor Nivel_agua, **F= 572.56** deja a su derecha un p-valor menor que **0.001**, menor que el nivel de significación del 5%, por lo que se rechaza la Hipótesis nula de igualdad de medias de los niveles del factor Nivel_agua. Es decir, existen diferencias significativas en la longitud del tallo de guisantes dependiendo del nivel del agua.
+* El valor del estadístico de contraste de igualdad de medias del factor Tipo_planta, **F= 132.445** deja a su derecha un p-valor menor que **0.001**, menor que el nivel de significación del 5%, por lo que se rechaza la Hipótesis nula de igualdad  de  medias del  factor  Tipo_planta.  Es decir,  el tipo de  planta  afecta significativamente a la longitud del tallo de guisantes.
+
+2.
+
+Para responder a esta pregunta, realizamos el contraste de hipótesis sobre la interacción de los dos factores
+$H0 = (\tau\beta)ij = 0$ (no existe interacción)   vs   $H1 = (\tau\beta)ij \ne 0$ (existe interacción).
+
+En la Tabla ANOVA mostrada anteriormente, el valor del estadístico de contraste de la interacción de los dos factores, **F= 27.32** deja a su derecha un p-valor menor que **0.001**, menor que el nivel de significación del 5%, por lo que se rechaza la Hipótesis nula de no interacción entre los factores. Por lo tanto la efectividad del nivel de agua no es la misma para los dos tipos de plantas. Es decir, puede ocurrir que un nivel de agua influya en el crecimiento de la longitud del tallo con un tipo de planta pero no con el otro o influya de distinta forma.
+
+3.
+
+```{r}
+library(agricolae)
+contraste  <- SNK.test(mod,"agua", console=TRUE, 
+              main="Contraste de Newman-Keuls para el factor nivel del agua")
+```
+
+En la tabla  se muestran los subgrupos formados  de medias iguales al utilizar el método de Newman-Keuls.  Hay tres subconjuntos que se diferencian entre sí y cada subconjunto está formado por un solo nivel de agua. También se observa que con el nivel de agua alto se produce la mayor longitud del tallo de guisantes, **113.925 cm**, y con el nivel Bajo se produce el menor **71.575 cm.**
+
+# Ejercicios Propuestos
+
+**Ejercicio Propuesto 1**
+
+La convección es una forma de transferencia de calor por los fluidos debido a sus variaciones de densidad por la temperatura; las partes calientes ascienden y las frías descienden formando las corrientes de convección que hacen uniforme la temperatura del fluido. Se ha realizado un experimento para determinar las modificaciones de la densidad de fluido al elevar la temperatura en una determinada zona. Los resultados obtenidos han sido los siguientes:
+
+\begin{center}
+\begin{tabular}{| c | c | c | c | c | c | }
+\hline
+Temperatura & \multicolumn{5}{| c |}{Densidad}\\ \hline
+100 & 21.8 & 21.9 & 21.7 & 21.6 & 21.7 \\
+125 & 21.7  & 21.4  & 21.5  & 21.4 &   \\
+150 & 21.9  & 21.8  & 21.8  & 21.6  & 21.5 \\
+175 & 21.9  & 22.1  & 21.85  &  21.9 &  \\ \hline
+\end{tabular}
+\end{center}
+
+Responder a las siguientes cuestiones:
+
+1. ¿Afecta la temperatura a la densidad del fluido?
+2. Determinar qué temperaturas producen modificaciones significativas en la densidad media del fluido.
+3. Estudiar las hipótesis del modelo: Homocedasticidad, independencia y normalidad.
+4. Se puede afirmar que las temperaturas de 100 y 125 producen menos densidades de fluido en promedio que las temperaturas de 150 y 175.
+
+**Solución**
+
+El problema planteado se modeliza a través de un diseño unifactorial totalmente aleatorizado de efectos fijos no-equilibrado.
+
+1.
+
+```{r}
+propuesto1 <- read.table("s9_propuesto1.txt", header = TRUE)
+propuesto1 
+```
+
+Transformando la variable referente a los niveles del factor fijo como factor 
+
+```{r}
+propuesto1$Temperatura <- factor(propuesto1$Temperatura)
+propuesto1$Temperatura 
+```
+
+Calculando el ANOVA
+
+```{r}
+mod <- aov(Densidad ~ Temperatura, data = propuesto1)
+mod
+
+summary(mod)
+```
+
+El valor de F experimental 6.983, deja a su derecha un p-valor = 0.00419 inferior a 0.05, por lo que se rechaza la hipótesis nula de igualdad de medias. Concluyendo que existen diferencias significativas en la densidad del fluido en función de la modificación de la temperatura
+
+2.
+
+```{r}
+mod.tukey <- TukeyHSD(mod, ordered = TRUE);mod.tukey 
+```
+
+Contraste de comparaciones múltiples de Duncan
+
+```{r}
+duncan <-duncan.test(mod, "Temperatura" ,   
+    main= " Modificaciones de la densidad de fluido al elevar la temperatura ")
+
+duncan
+```
+
+No existe suficiente evidencia para rechazar la hipótesis.
+
+3.
+
+**Hipótesis de HOMOCEDASTICIDAD**
+
+```{r}
+bartlett.test(propuesto1$Densidad, propuesto1$Temperatura)
+```
+
+B= 0.69212, y un p-valor = 0.8751, que nos indica que no se existe suficiente evidencia para rechazar la igualdad entre las varianzas entre las densidades registradas para las diferentes temperaturas
+
+**Hipótesis de INDEPENDENCIA**
+
+```{r}
+layout(matrix(c(1,2,3,4),2,2))
+plot(mod)
+```
+
+. Para comprobar que se satisface el supuesto de independencia entre los residuos, observamos el primer gráfico que se representan los residuos en el eje de ordenadas y los valores pronosticados en el eje de abscisas. La presencia de alguna tendencia en el gráfico puede indicar la alteración de dicha hipótesis. En este gráfico no se observa ninguna tendencia concreta lo que muestra la no existencia de relación de dependencia. 
+
+**Hipótesis de NORMALIDAD**
+
+```{r}
+# Calculo de los residuos del modelo
+g = mod$residuals
+
+# Calculamos la media de los residuos
+m <- mean(g);m
+
+# Calculamos la desviación típica
+std <- sqrt(var(g))
+std
+
+# Representamos el histograma
+hist(g, prob = TRUE, xlab ="Residuos", ylim = c(0, 5), 
+      main = "F. dens. Normal hist. de residuos")
+
+# Curva normal sobre el histograma
+curve(dnorm(x, mean = m, sd = std), col ="darkblue", lwd =2, add = TRUE, yaxt ="n")
+```
+
+El gráfico Q-Q, no muestra desviaciones importantes a la normalidad
+
+Comprobando la hipótesis de normalidad mediante el contraste de Shapiro-Wilk
+
+```{r}
+shapiro.test(mod$residuals)
+```
+
+El valor del p-valor es de 0.3712, por lo tanto no existe suficiente evidencia para rechazar la hipótesis de normalidad de los residuos
+
+4.
+
+El test de Duncan nos muestra:
+```{r}
+duncan
+```
+Se muestra en la tabla que las temperaturas de 150 y 125 producen menos densidades de fluido en promedio que las temperaturas de 100 y 175
