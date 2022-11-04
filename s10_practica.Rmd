@@ -219,3 +219,457 @@ local({  .Table <- xtabs(~Sexo+coche_rec, data=empleados)
 ```
 
 El intervalo de confianza pedido al 85% de confíanza es  (-0.2729805,  0.3304517). El 0 está dentro de este intervalo, por lo que podemos concluir que las proporciones de hombre y mujeres que tienen coche coinciden.
+
+# EJERCICIOS GUIADOS
+
+**Ejercicio Guiado 1**
+
+En la base de datos universidad.txt tenemos información sobre las variables, Coeficiente intelectual y Asistir a clase de estadística de dos grupos de alumnos, dependiendo del turno de clase en el que se encuentren. El turno de mañana se define como A y el de tarde como B.
+
+Se pide:
+
+a) Obtener un intervalo de confianza a un nivel del 99% para el cociente intelectual medio, sabiendo que la varianza poblacional es igual a 3
+
+b) Obtener un intervalo de confianza a un nivel del 95% para el cociente intelectual medio
+
+c) Obtener un intervalo de confianza a un nivel del 98% para la diferencia media de cociente intelectual entre el grupo A y B. ¿Puede suponerse que el cociente intelectual medio entre ambos grupos es igual?
+
+d) Obtener un intervalo de confianza a un nivel del 90% para la proporción de alumnos en el grupo A. Y un intervalo de confianza al 90% para la proporción de alumnos en el grupo B
+
+e) Obtener un intervalo de confianza a un nivel del 93% para la diferencia entre la proporción de alumnos en el grupo A y B que no tienen clase de estadística.
+
+**Solución**
+
+```{r}
+universidad <- 
+  read.table("C:/Users/abbyc/Desktop/Ciclo II 2022/Análisis estadístico con R/curso-R-2022/universidad.txt", 
+  header=TRUE, stringsAsFactors=TRUE, sep="", na.strings="NA", dec=".", strip.white=TRUE)
+```
+
+a) Obtener un intervalo de confianza a un nivel del 99% para el cociente intelectual medio, sabiendo que la varianza poblacional es igual a 3
+
+En este caso nos encontramos ante un intervalo de confianza sobre la media de una población normal con varianza conocida, por lo que hay que calcularlo mediante código
+
+Introducimos en R Commander los datos relativos al nivel de significación y la varianza poblacional de la variable que proporciona el enunciado.
+
+```{r}
+alpha<-0.01
+varianza<-3
+```
+
+Calculamos por separado cada uno de los elementos restantes que necesitamos para obtener el intervalo de confianza.
+
+```{r}
+n <- nrow(universidad)
+media <- mean(universidad$C.I.)
+cuantil<- qnorm(1 - alpha/2)
+```
+
+
+Por último, calculamos los extremos inferior y superior del intervalo
+
+```{r}
+lim_inferior<-media - cuantil * sqrt(varianza) / sqrt(n)
+lim_inferior
+
+lim_superior<- media + cuantil * sqrt(varianza) / sqrt(n)
+lim_superior
+```
+
+Por lo que el intervalo de confianza que buscamos es **(99.20477,  103.1952).**
+
+**Nota:** Recordar que para que se ejecute una instrucción hay que pulsar Ejecutar
+
+b) Obtener un intervalo de confianza a un nivel del 95% para el cociente intelectual medio
+
+En este caso nos encontramos ante un intervalo de confianza sobre la media de una población normal con varianza desconocida. Para realizarlo con R-Commander, seleccionamos en el menú principal: Estadísticos/Medias/ Test t para una muestra
+
+En la parte superior izquierda aparece una lista con todas las variables cuantitativas del archivo de datos que son susceptibles de ser contrastadas, de la cual debemos elegir exclusivamente una. Elegimos C.I
+
+El resto de opciones las dejamos por defecto, ya que el enunciado nos pide el intervalo de confianza al 95%.
+
+```{r}
+with(universidad, (t.test(C.I., alternative='two.sided', mu=0.0, conf.level=.95)))
+```
+
+Por lo que el intervalo de confianza es **(97.64442, 104.75558).**
+
+
+c) Obtener un intervalo de confianza a un nivel del 98% para la diferencia media de cociente intelectual entre el grupo A y B. ¿Puede suponerse que el cociente intelectual medio entre ambos grupos es igual?
+
+En este caso nos encontramos ante un intervalo de confianza para la diferencia de medias en dos poblaciones normales independientes.
+
+En primer lugar tenemos que saber si las varianzas de ambas distribuciones son iguales. Para ello, seleccionamos en R-Commander: Estadísticos/ Varianzas/ Test F para dos varianzas. Se muestra la siguiente pantalla
+
+La pestaña Datos muestra dos listas de variables. La lista de la izquierda (Grupos) incluye todas las variables cualitativas del fichero de datos. En esta lista tenemos que seleccionar cuál es la variable que nos va a dividir la muestra de observaciones en dos submuestras independientes. En nuestro caso, Grupo. En la lista de la derecha se incluyen las variables cuantitativas del fichero de datos. Aquí tenemos que señalar la variable principal sobre la cual se va a llevar a cabo el contraste (en nuestro caso, C.I.). Seleccionamos Opciones
+
+En la pestaña Opciones podemos personalizar el contraste. Como en este caso sólo nos interesa el intervalo de confianza, sólo hemos de mirar el nivel de confianza. Por defecto es 0.95, por lo que lo cambiamos a 0.98. Pulsamos Aceptar y se muestra la siguiente salida.
+
+```{r}
+Tapply(C.I. ~ Grupo, var, na.action=na.omit, data=universidad) # variances by group
+
+var.test(C.I. ~ Grupo, alternative='two.sided', conf.level=.98, data=universidad)
+```
+
+El intervalo de confianza para el cociente de las varianzas, **(3.083642e-04, 1.518580e+02)**.  Dicho intervalo incluye al 1 entre sus posibles valores. Esto implica que a un nivel de confianza del 98% se puede suponer que el cociente entre las dos varianzas puede tomar el valor 1 o, lo que es lo mismo, que las dos varianzas son iguales.
+
+Una vez se ha determinado la igualdad de las varianzas de ambas distribuciones, procedemos a calcular el intervalo de confianza para la diferencia de las medias cuando las varianzas poblacionales son iguales. Para ello, seleccionamos en  R-Commander: Estadísticos/Medias/Test t para muestras independientes
+
+La pestaña Opciones muestra todas las opciones del contraste que podemos modificar. En nuestro caso como sólo buscamos el intervalo de confianza, especificamos el nivel de confianza que se va a asumir al calcular el intervalo (98%) e indicamos si las varianzas de las dos poblaciones pueden suponerse iguales o no, en nuestro caso Sí.
+
+```{r}
+t.test(C.I.~Grupo, alternative='two.sided', conf.level=.98, var.equal=TRUE, data=universidad)
+```
+
+El intervalo de confianza a un 98% de confianza para la diferencia de las medias del cociente intelectual entre el grupo A y el B es **(-13.34472, 14.01139)**. Como el 0 está dentro de este intervalo, tenemos suficiente evidencia muestral para decir que el cociente intelectual medio del grupo A y B son iguales.
+
+d) Obtener un intervalo de confianza a un nivel del 90% para la proporción de alumnos en el grupo A. Y un intervalo de confianza al 90% para la proporción de alumnos en el grupo B
+
+En este caso nos encontramos ante un intervalo de confianza para la proporción.
+
+* Obtener un intervalo de confianza a un nivel del 90% para la proporción de alumnos en el grupo A.
+
+Dado que la hipótesis que se ha planteado se ha hecho sobre el grupo A, no es necesario hacer ninguna recodificación de la variable. Seleccionamos: Estadísticos/Proporciones/Test de proporciones para una muestra
+
+En este caso elegimos la variable Grupo. En la pestaña Opciones modificamos el valor del nivel de confianza a un 90%.
+
+```{r}
+local({
+  .Table <- xtabs(~ Grupo , data= universidad )
+  cat("\nFrequency counts (test is for first level):\n")
+  print(.Table)
+  prop.test(rbind(.Table), alternative='two.sided', p=.5, conf.level=.90, correct=FALSE)
+})
+```
+
+Por lo que el intervalo de confianza, a un nivel de confianza del 90% para la proporción de estudiantes en el grupo A es **(0.2724832, 0.8572935).**
+
+* Obtener un intervalo de confianza a un nivel del 90% para la proporción de alumnos en el grupo B.
+
+Dado que la hipótesis que se ha planteado se ha hecho sobre el grupo B es necesario hacer una recodificación de la variable. Para ello seleccionamos Datos/Modificar variables del conjunto de datos activo/Recodificar variables
+
+```{r}
+universidad <- within(universidad, {
+  Grupo_rec <- Recode(Grupo, '"A"="2A"; "B"="1B"', as.factor=TRUE)
+})
+```
+
+Una vez recodificada la variable, pasamos a calcular el intervalo de confianza. En este caso nos encontramos ante un intervalo de confianza para la proporción. Seleccionamos: Estadísticos/Proporciones/Test de proporciones para una muestra.
+
+En este caso elegimos la variable Grupo_rec. En la pestaña Opciones modificamos el valor del nivel de confianza a un 90%.
+
+```{r}
+local({
+  .Table <- xtabs(~ Grupo_rec , data= universidad )
+  cat("\nFrequency counts (test is for first level):\n")
+  print(.Table)
+  prop.test(rbind(.Table), alternative='two.sided', p=.5, conf.level=.90, correct=FALSE)
+})
+```
+
+Por lo que el intervalo de confianza, a un nivel de confianza del 90% para la proporción de estudiantes en el grupo B es **(0.1427065, 0.7275168).**
+
+e) Obtener un intervalo de confianza a un nivel del 93% para la diferencia entre la proporción de alumnos en el grupo A y B que no tienen clase de estadística.
+
+Dado que la hipótesis que se ha planteado se ha hecho sobre los alumnos que no tienen clase de estadística no es  necesario hacer una recodificación de la variable Estadística. En este caso nos encontramos ante un intervalo de confianza para la diferencia de dos proporciones. Seleccionamos: Estadísticos/Proporciones/Test de proporciones para dos muestras. 
+
+ De la primera lista seleccionamos la variable de agrupación (en nuestro caso es el Grupo) y de la segunda, la variable de interés (Estadística). Ya en la segunda pestaña (Opciones) indicamos el nivel de confianza propuesto en el enunciado, 93%.
+ 
+```{r}
+local({  .Table <- xtabs(~Grupo+Estadistica, data=universidad)
+  cat("\nPercentage table:\n")
+  print(rowPercents(.Table))
+  prop.test(.Table, alternative='two.sided', conf.level=.93, correct=FALSE)
+})
+```
+
+Por último, el programa devuelve el intervalo de confianza al 93% de confíanza, **(-0.9750999, 0.6417665)**. El 0 está dentro de este intervalo, por lo que podemos concluir que las proporciones de alumnos en ambos grupos que no tienen clase de estadística coinciden.
+
+**Ejercicio Guiado 2* (Resuelto)**
+
+En un hospital se elige una muestra de pacientes y se les mide la tasa cardíaca por la mañana (TCM) y a última hora de la tard (TCT). 
+
+Estudiar mediante un intervalo de confianza al 99% si, por término medio, la tasa cardíaca es igual por la mañana y a última hora de la tarde.
+
+**Solución**
+
+```{r}
+tcardiaca <- 
+  read.table("C:/Users/abbyc/Desktop/Ciclo II 2022/Análisis estadístico con R/curso-R-2022/tcardiaca.txt",
+   header=TRUE, stringsAsFactors=TRUE, sep="", na.strings="NA", dec=".", strip.white=TRUE)
+```
+
+En este caso nos encontramos ante un intervalo de confianza para la diferencia medias en dos poblaciones normales relacionadas. Seleccionamos: Estadísticos/Medias/Test t para datos relacionados. 
+
+La pestaña Datos muestra dos listas de variables cada una de las cuales incluye todas las variables cuantitativas que son susceptibles de ser analizadas. Seleccionamos en cada lista la variable que nos interese (TCM y TCT en nuestro caso).
+
+En la pestaña Opciones podemos personalizar el contraste. Como en este caso sólo nos interesa el intervalo de confianza, introducimos el valor del nivel de confianza dado en el enunciado (99%).
+
+```{r}
+with(tcardiaca, (t.test(TCM, TCT, alternative='two.sided', conf.level=.99, paired=TRUE)))
+```
+
+En la segunda parte de los resultados se incluye el intervalo de confianzaal 99% para la diferencia de las medias de la variable tasa cardíaca, que es **(-18.411312, 8.811312)**. Este intervalo incluye el valor 0, lo que significa que el 0 es un valor posible para la diferencia entre las medias. Por ello, concluimos que puede asumirse que la diferencia entre dichas medias es 0, o dicho de otro modo, que ambas tasas cardíacas son iguales.
+
+**Ejercicio Guiado 3* (Resuelto)**
+
+Una determinada empresa quiere saber si su nuevo producto tendrá más aceptación en la población de hombres o entre las mujeres. Para ello, considera una muestra aleatoria de 38 hombres y 62 mujeres, observando que sólo a 15 hombres y 33 mujeres les había gustado su producto. Construir un intervalo de confianza al 99% de confianza para la diferencia de proporciones de hombres y mujeres a los que les gusta el producto. ¿Puede suponerse que el producto gusta por igual en hombres y mujeres?
+
+**Solución**
+
+```{r}
+empresa <- 
+  readXL("C:/Users/abbyc/Desktop/Ciclo II 2022/Análisis estadístico con R/curso-R-2022/empresa.xls",
+   rownames=FALSE, header=TRUE, na="", sheet="Respuestas", stringsAsFactors=TRUE)
+```
+
+Dado que la hipótesis que se ha planteado se ha hecho la diferencia entre mujeres y hombres a los que les gusta el producto, es necesario hacer una recodificación de la variable Producto. Para ello seleccionamos Datos/Modificar variables del conjunto de datos activo/Recodificar variables
+
+```{r}
+empresa <- within(empresa, {
+  Producto_rec <- Recode(Producto, '"Sí"="1Sí"; "No"="2No"', as.factor=TRUE)
+})
+```
+
+A continuación realizamos un intervalo de confianza para la diferencia de dos proporciones. Seleccionamos: Estadísticos/Proporciones/Test de proporciones para dos muestras
+
+La pestaña Datos muestra dos listas con las variables cualitativas que incluye el conjunto de datos. De la primera lista seleccionamos la variable de agrupación (en nuestro caso es el Sexo) y de la segunda, la variable de interés (Producto_rec).
+
+En la pestaña Opciones podemos personalizar el contraste. Como en este caso sólo nos interesa el intervalo de confianza, introducimos el valor del nivel de confianza dado en el enunciado (99%).
+
+```{r}
+local({  .Table <- xtabs(~Sexo+Producto_rec, data=empresa)
+  cat("\nPercentage table:\n")
+  print(rowPercents(.Table))
+  prop.test(.Table, alternative='two.sided', conf.level=.99, correct=FALSE)
+})
+```
+
+Según los resultados, el intervalo de confianza para la diferencia de proporciones que buscamos es **( -0.3989753  0.1239329)**, el cual incluye al 0, por lo que se puede afirmar que el producto gusta por igual entre hombres y mujeres.
+
+**Ejercicio Guiado 4**
+
+En una experiencia genética se extraen 20 moscas de una caja experimental y se mide la longitud del ala de cada una. Se obtuvieron los siguientes valores:
+
+93, 90, 97, 90, 93, 91, 96, 94, 91, 91, 88, 93, 95, 91, 89, 92, 87, 88, 90, 86
+
+Suponiendo que la longitud del ala sigue una distribución Normal.  Construir un intervalo de confianza al 99% de confianza para
+
+a) La media $\mu$
+
+b) La varianza $\sigma^2$
+
+**Solución**
+
+```{r}
+moscas <- 
+  read.table("C:/Users/abbyc/Desktop/Ciclo II 2022/Análisis estadístico con R/curso-R-2022/moscas.txt",
+   header=TRUE, stringsAsFactors=TRUE, sep="", na.strings="NA", dec=".", strip.white=TRUE)
+```
+
+a) Construir un intervalo de confianza al 99% de confianza para la media $\mu$
+
+Hay que obtener un intervalo de confianza cuando la varianza poblacional es desconocida
+
+Accedemos al menú Test t para una muestra, seleccionando en el menú principal: Estadísticos/ Medias/ Test t para una muestra.
+
+En este caso queremos obtener un intervalo de confianza, por lo que dejamos marcada la opción por defecto Media poblacional!=mu0 y como Hipótesis nula: mu=0.0. Lo único que tenemos que cambiar es el nivel de confianza (el valor se introduce en tanto por uno). Nivel de confianza: .99.
+
+```{r}
+with(moscas, (t.test(Longitud, alternative='two.sided', mu=0.0, conf.level=.99)))
+```
+
+El intervalo de confianza para la longitud media de las alas al 99% de confianza, es **(89.37195, 93.12805)**
+
+b) Construir un intervalo de confianza para la varianza $\sigma^2$ al 99% de confianza.
+
+**Nota: R-Commander** no incluye una función específica para el cálculo de intervalos de confianza en este tipo de situaciones. Por lo tanto calcularemos el intervalo de la siguiente forma
+
+```{r}
+n <- length(moscas$Longitud)
+varianza <- var(moscas$Longitud)
+L1 <- (n - 1) * varianza / qchisq(1-alpha / 2,n - 1)
+L2 <- (n - 1) * varianza / qchisq(alpha /2,n - 1)
+IC <- c(L1,L2)
+IC
+```
+
+El intervalo pedido es: **(4.244179, 23.926166)**
+
+# EJERCICIOS PROPUESTOS
+
+**Ejercicio Propuesto 1**
+
+En la tabla siguiente se muestran los salarios mensuales en euros de 10 trabajadores de Madrid y Barcelona.
+
+Se pide:
+
+a) Obtener un intervalo de confianza a un nivel del 89% para el salario medio entre ambas ciudades
+
+b) Obtener un intervalo de confianza a un nivel del 90% para la diferencia media de salarios entre ambas ciudades. ¿Se pueden considerar iguales? 
+
+c) Obtener un intervalo de confianza a un nivel del 90% para la proporción de trabajadores en Barcelona.
+
+**Solución**
+
+```{r}
+salario <- 
+  readXL("C:/Users/abbyc/Desktop/Ciclo II 2022/Análisis estadístico con R/curso-R-2022/salario.xlsx",
+   rownames=FALSE, header=TRUE, na="", sheet="Hoja1", stringsAsFactors=TRUE)
+```
+
+a) Obtener un intervalo de confianza a un nivel del 89% para el salario medio entre ambas ciudades
+
+```{r}
+with(salario, (t.test(Salario, alternative='two.sided', mu=0.0, conf.level=.89)))
+```
+
+Por lo que el intervalo de confianza es **(1957.145, 2262.855).**
+
+b) Obtener un intervalo de confianza a un nivel del 90% para la diferencia media de salarios entre ambas ciudades. ¿Se pueden considerar iguales? 
+
+En primer lugar, comprobamos si las varianzas de ambas distribuciones son iguales.
+
+```{r}
+Tapply(Salario ~ Ciudad, var, na.action=na.omit, data=salario) # variances by group
+var.test(Salario ~ Ciudad, alternative='two.sided', conf.level=.95, data=salario)
+```
+
+El intervalo de confianza para el cociente de las varianzas es (0.2372666, 11.5686088).  Dicho intervalo incluye al 1 entre sus posibles valores. Esto implica que a un nivel de confianza del 90% se puede suponer que el cociente entre las dos varianzas puede tomar el valor 1 o, lo que es lo mismo, que las dos varianzas son iguales.
+
+Una vez se ha determinado la igualdad de las varianzas de ambas distribuciones, procedemos a calcular el intervalo de confianza para la diferencia de las medias propiamente dicho.
+
+```{r}
+t.test(Salario~Ciudad, alternative='two.sided', conf.level=.90, var.equal=FALSE,
+data=salario)
+```
+
+El intervalo de confianza a un 90% de confianza para la diferencia de las medias de  salarios entre ambas ciudades es **(-403.3204, 286.6537)**. Como el 0 está dentro de este intervalo, tenemos suficiente evidencia muestral para decir que los salarios en ambas ciudades son iguales.
+
+c) Obtener un intervalo de confianza a un nivel del 90% para la proporción de trabajadores en Barcelona.
+
+En este caso nos encontramos ante un intervalo de confianza para la proporción.
+
+Dado que la hipótesis que se ha planteado se ha hecho sobre Barcelona, no es necesario hacer ninguna recodificación de la variable.
+
+```{r}
+local({
+  .Table <- xtabs(~ Ciudad , data= salario )
+  cat("\nFrequency counts (test is for first level):\n")
+  print(.Table)
+  prop.test(rbind(.Table), alternative='two.sided', p=.5, conf.level=.90, correct=FALSE)
+})
+```
+
+Por lo que el intervalo de confianza, a un nivel de confianza del 90% para la proporción de trabajadores en Barcelona es (0.1942270, 0.6483614).
+
+**Ejercicio Propuesto 2**
+
+Para comprobar si un determinado fertilizante puede mejorar la producción de manzanas, se selecciona una muestra aleatoria simple de 10 árboles. En la tabla siguiente se muestra el peso (en Kgr) de manzanas por árbol recogidas antes y después del tratamiento
+
+Obtener un intervalo de confianza al 98% para la diferencia de los pesos medios producida antes y después del tratamiento.
+
+**Solución**
+
+```{r}
+manzanas <- 
+  readXL("C:/Users/abbyc/Desktop/Ciclo II 2022/Análisis estadístico con R/curso-R-2022/manzanas.xlsx",
+   rownames=FALSE, header=TRUE, na="", sheet="Hoja1", stringsAsFactors=TRUE)
+```
+
+El  intervalo de confianza al 98% para la diferencia de los pesos medios producida antes y después del tratamiento
+
+```{r}
+with(manzanas, (t.test(Antes, Después, alternative='two.sided', conf.level=.98, paired=TRUE)))
+```
+
+En la segunda parte de los resultados se incluye el intervalo de confianzaal 98% para la diferencia de las medias los pesos, que es (-1.0006005, 0.1406005). Este intervalo incluye el valor 0, lo que significa que el 0 es un valor posible para la diferencia entre las medias. Por ello, concluimos que puede asumirse que la diferencia entre dichas medias es 0, o dicho de otro modo, que ambos pesos son iguales.
+
+**Ejercicio Propuesto 3**
+
+En una muestra aleatoria de 150 personas con pelo oscuro se encontró que 90 de ellas tenían los ojos azules. Construir un intervalo de confianza al 95% para la proporción de individuos que teniendo pelo oscuro en la población posee ojos azules. ¿Son compatibles estos resultados con la suposición de que dicha proporción vale 2/3).
+
+**Solución**
+
+```{r}
+propuesto <- 
+  readXL("C:/Users/abbyc/Desktop/Ciclo II 2022/Análisis estadístico con R/curso-R-2022/propuesto3-1.xlsx",
+   rownames=FALSE, header=TRUE, na="", sheet="Hoja1", stringsAsFactors=TRUE)
+```
+
+Recodificar la variable 
+```{r}
+propuesto <- within(propuesto, {
+  Azules_rec <- Recode(Azules, '"Sí"="1Sí"; "No"="2No"', as.factor=TRUE)
+})
+```
+
+
+```{r}
+local({
+  .Table <- xtabs(~ Azules_rec , data= propuesto )
+  cat("\nFrequency counts (test is for first level):\n")
+  print(.Table)
+  prop.test(rbind(.Table), alternative='two.sided', p=.5, conf.level=.95, correct=FALSE)
+})
+```
+
+El intervalo de confianza para la proporción de individuos que teniendo pelo oscuro en la población posee ojos azules, a un nivel del 95%, es (0.5200492, 0.6749568). Este resultado si es compatible con la suposición de que dicha proporción vale 2/3, ya que 2/3 pertenece al intervalo.
+
+
+**Ejercicio Propuesto 4**
+
+En una piscifactoría se desea comparar el porcentaje de peces adultos que miden menos de 20 cm con los que miden más de 40 cm. Para ello, se toma una muestra de 200 peces observando que 40 de ellos miden menos de 20 cm y una muestra de 200 peces de los que 57 miden más de 40 cm. Halla un intervalo de confianza para:
+
+a) La diferencia de proporciones de peces adultos que miden más de 40 cm con los que miden menos de 20 cm al nivel de confianza del 0.95
+
+b) La diferencia de proporciones de peces adultos que miden menos de 20 cm con los que miden más de 40 cm al nivel de confianza del 0.95
+
+**Solución**
+
+```{r}
+propuesto4 <- 
+  readXL("C:/Users/abbyc/Desktop/Ciclo II 2022/Análisis estadístico con R/curso-R-2022/propuesto4-1.xlsx",
+   rownames=FALSE, header=TRUE, na="", sheet="Hoja1", stringsAsFactors=TRUE)
+```
+
+a) La diferencia de proporciones de peces adultos que miden más de 40 cm con los que miden menos de 20 cm al nivel de confianza del 0.95
+
+Recodificar la variable
+```{r}
+propuesto4 <- within(propuesto4, {
+  resultado_rec <- Recode(resultado, '"Sí"="1Sí"; "No"="2No"', as.factor=TRUE)
+})
+```
+
+
+```{r}
+local({  .Table <- xtabs(~medida+resultado_rec, data=propuesto4)
+  cat("\nPercentage table:\n")
+  print(rowPercents(.Table))
+  prop.test(.Table, alternative='two.sided', conf.level=.95, correct=FALSE)
+})
+```
+
+Intervalo de confianza para la diferencia de proporciones entre los peces adultos que miden más de 40 cm y los que miden menos de 20 cm al 95%  (0.001410925,  0.168589075)
+
+b) La diferencia de proporciones de peces adultos que miden menos de 20 cm con los que miden más de 40 cm al nivel de confianza del 0.95
+
+Recodificar la variable
+```{r}
+propuesto4 <- within(propuesto4, {
+  media_rec <- Recode(medida, '"menosde20"="1menosde20"; "masde40"="2masde40";', 
+  as.factor=TRUE)
+})
+```
+
+
+```{r}
+local({  .Table <- xtabs(~media_rec+resultado_rec, data=propuesto4)
+  cat("\nPercentage table:\n")
+  print(rowPercents(.Table))
+  prop.test(.Table, alternative='two.sided', conf.level=.95, correct=FALSE)
+})
+```
+
+Intervalo de confianza para la diferencia de proporciones entre los peces adultos que miden menos de 20 cm y los que miden más de 40 cm al 95%  ( -0.168589075,  -0.001410925).
