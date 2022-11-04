@@ -5,7 +5,6 @@ empleados <-
 save("empleados", 
   file="C:/Users/abbyc/Desktop/Ciclo II 2022/Análisis estadístico con R/curso-R-2022/empleados.R.Data")
 
-
 alpha<-0.05
 varianza<-7.5
 
