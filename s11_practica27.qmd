@@ -162,23 +162,3 @@ fitted(modelo1) # valores estimados
 residuals(modelo1) # residuos
 influence(modelo1) # puntos de influencia
 ```
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-

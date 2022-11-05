@@ -1,0 +1,160 @@
+---
+title: "s10"
+author: "Abigail Ramos"
+date: "4/11/2022"
+output: pdf_document
+---
+
+```{r echo=FALSE}
+# include this code chunk as-is to set options
+knitr::opts_chunk$set(comment=NA, prompt=TRUE, out.width=750, fig.height=8, fig.width=8)
+library(Rcmdr)
+library(car)
+library(RcmdrMisc)
+```
+
+
+```{r echo=FALSE}
+# include this code chunk as-is to enable 3D graphs
+library(rgl)
+knitr::knit_hooks$set(webgl = hook_webgl)
+```
+# REGRESIÓN LINEAL SIMPLE
+
+* EJEMPLO 1.
+
+En el archivo “costes.dat” se encuentra la información correspondiente a 34 fábricas de producción en el montaje de placas para ordenador, el archivo contiene la información sobre el costo total (primera columna) y el número de unidades fabricadas (segunda columna). Suponga que deseamos ajustar un modelo de regresión simple a los datos para estimar el costo total en función del número de unidades fabricadas.
+
+```{r}
+costes <- read.table("C:/Users/abbyc/Desktop/Ciclo II 2022/Análisis estadístico con R/curso-R-2022/costes.dat", 
+                     header=TRUE, stringsAsFactors=TRUE, sep="", na.strings="NA", 
+                     dec=".", strip.white=TRUE)
+```
+
+Lo primero que debemos es hacer es graficar los datos. Para obtener el diagrama de dispersión de las variables el procedimiento es el siguiente: en el menú “Gráficas” seleccionar la opción “Gráfica XY”.
+
+Al realizar el procedimiento anterior se mostrará un cuadro de dialogo como el de la figura siguiente. En el únicamente debemos elegir las variables que se graficarán. En el recuadro de la parte derecha debemos seleccionar a nuestra variable independiente, la cual hemos dicho que es el número de unidades producidas; mientras que en el recuadro de la derecha debemos elegir nuestra variable dependiente, que para nuestro ejemplo es el costo total. Los demás argumentos se dejan por defecto.
+
+```{r}
+library(lattice)
+xyplot(Costes ~ Unidades, type="p", pch=16, auto.key=list(border=TRUE), 
+  par.settings=simpleTheme(pch=16), scales=list(x=list(relation='same'), 
+  y=list(relation='same')), data=costes)
+```
+
+
+Para ajustar un modelo de regresión lineal en la interfaz gráfica de R, el procedimiento es el siguiente: en el menú “Estadísticos” seleccionamos la opción “Ajuste de modelos”, finalmente debemos elegir la opción “Regresión lineal”.
+
+Al realizar el procedimiento descrito anteriormente nos mostrará un cuadro de dialogo en el que debemos tener en cuenta lo siguiente: el nombre que le daremos al modelo de regresión resultante, este nombre se da en la opción “Introducir un nombre para el modelo”. En el recuadro de la izquierda debemos seleccionar a nuestro variable dependiente (Costos); mientras que en el recuadro de la derecha debemos seleccionar a nuestra variable independiente (Unidades).
+
+```{r}
+RegModel.1 <- lm(Costes~Unidades, data=costes)
+summary(RegModel.1)
+```
+
+
+Como el término constante no es significativo se quitara del modelo, volvemos a realizar los cálculos en la interfaz gráfica. En el menú “Estadísticos” seleccionamos la opción “Ajuste de modelos” y finalmente la opción “Modelo lineal”. Esta opción nos permite descartar la constante del modelo (debemos agregar -1 al final de la instrucción).
+
+
+```{r}
+LinearModel.2 <- lm(Costes ~ Unidades-1, data=costes)
+summary(LinearModel.2)
+```
+
+Una vez estimados los parámetros del modelo, el siguiente paso es validarlo, es decir verificar si se cumplen las cuatro hipótesis básicas del modelo. Para verificar esto, podríamos realizar los siguientes pasos:
+
+En el menú “Modelos” seleccionamos la opción “Gráficas”, posteriormente seleccionamos la opción “Gráficas básicas del modelo”.
+
+```{r}
+oldpar <- par(oma=c(0,0,3,0), mfrow=c(2,2))
+```
+
+
+```{r}
+plot(LinearModel.2)
+```
+
+
+```{r}
+par(oldpar)
+```
+
+
+El procedimiento para obtener las medidas anteriores es el siguiente: en el menú “Modelos” seleccionamos la opción “Añadir las estadísticas de las observaciones a los datos...”. Posteriormente en el cuadro de dialogo que se mostrará elegir todas las opciones que se quieran analizar.
+
+```{r}
+costes<- within(costes, {
+  fitted.LinearModel.2 <- fitted(LinearModel.2)
+  residuals.LinearModel.2 <- residuals(LinearModel.2)
+  rstudent.LinearModel.2 <- rstudent(LinearModel.2)
+  hatvalues.LinearModel.2 <- hatvalues(LinearModel.2)
+  cooks.distance.LinearModel.2 <- cooks.distance(LinearModel.2) 
+})
+```
+
+# REGRESIÓN LINEAL MÚLTIPLE
+
+* EJEMPLO 2.
+
+En el archivo “preciocasas.dat” tienen la información sobre 100 datos de precios de viviendas y sus características, el archivo se encuentra estructurado de la siguiente forma:
+
+```{r}
+preciocasas <- 
+  read.table("C:/Users/abbyc/Desktop/Ciclo II 2022/Análisis estadístico con R/curso-R-2022/preciocasas.txt",
+   header=TRUE, stringsAsFactors=TRUE, sep="", na.strings="NA", dec=".", 
+  strip.white=TRUE)
+names(preciocasas)<-c("Precio","X1","X2","X3","X4","X5","X6")
+```
+
+* Primera columna: precios de viviendas en euros.
+* Segunda columna: superficie en metros cuadrados.
+* Tercera: numero de cuartos de baño.
+* Cuarta: número de dormitorios.
+* Quinta: número de plazas de garaje.
+* Sexta: edad de la vivienda .
+* Séptima: 1 =buenas vistas y 0 =vistas corrientes
+
+Suponga que deseamos estimar un modelo de regresión en el cual relacionemos el precio de una vivienda en función de sus características.
+
+Lo primero que debemos hacer es la matriz de diagramas de dispersión. El procedimiento para obtenerla es el siguiente: en el menú “Gráficas” seleccionamos la opción “Matriz de diagramas de dispersión...”.
+
+```{r}
+library(car)
+scatterplotMatrix(~Precio+X1+X2+X3+X4+X5+X6, regLine=FALSE, smooth=FALSE, diagonal=list(method="density"), data=preciocasas)
+```
+
+Para ajustar el modelo de regresión múltiple el procedimiento es el siguiente: en el menú “Estadísticos” seleccionamos la opción “Ajuste de modelos”, finalmente elegimos la opción “Regresión lineal”.
+
+Al realizar el procedimiento anterior nos mostrará un cuadro de dialogo como el de la figura siguiente. En el recuadro de la izquierda debemos seleccionar nuestra variable dependiente (Precio), mientras que el recuadro de la derecha debemos todas las variables independientes (todas las restantes variables).
+
+```{r}
+RegModel.3 <- lm(Precio~X1+X2+X3+X4+X5+X6, data=preciocasas)
+summary(RegModel.3)
+```
+
+De los resultados anteriores puede apreciarse que el intercepto, y las variables x2 (número de cuarto de baño) y x3 (número de dormitorios) no parecen influir en la estimación del precio de la vivienda por lo podrían descartarse de la ecuación.
+
+Una forma alternativa y mucho más eficiente para seleccionar el mejor conjunto de variables independientes en el modelo es utilizar algoritmos selección de modelos tales como: Selección hacia adelante, selección hacia atrás y Selección paso a paso.
+
+El procedimiento para realizar cualquiera de los algoritmos anteriores es el siguiente: en el menú “Modelos” seleccionamos la opción “Selección de modelos paso a paso...”.
+
+Al realizar el procedimiento anterior nos mostrara un cuadro de dialogo como el de la figura siguiente. En dicho cuadro únicamente debemos elegir la dirección del criterio de selección de variables teniendo en cuenta únicamente que: atrás/adelante para una selección por pasos en el que se inicia con todas las variables; adelante/atrás es para una selección por pasos pero iniciando con ninguna variable en el modelo; finalmente las opciones Atrás y Adelante son para la selección hacia atrás y selección hacia adelante, respectivamente. Finalmente lo único que debe tenerse en cuenta es el criterio para seleccionar los modelos los cuales son: el criterio AIC y el BIC, ambos son equivalentes, pero en el segundo se penaliza más el número de variables en el modelo, evitando así obtener un modelo con demasiadas variables.
+
+```{r}
+library(MASS, pos=18)
+#stepwise(RegModel.3, direction='backward/forward', criterion='BIC')
+```
+
+Otra cosa que es de tener en cuenta a la hora de seleccionar variables en el modelo es que no exista multicolinealidad, es decir, que no exista dependencia entre las variables independientes. La multicolinealidad se estudia con ayuda del siguiente procedimiento: en el menú “Modelos” seleccionamos la opción “Diagnósticos numéricos”, finalmente elegimos la opción “Factores de inflación de la varianza”.
+
+```{r}
+vif(RegModel.3)
+```
+
+
+```{r}
+round(cov2cor(vcov(RegModel.3)), 3) # Correlations of parameter estimates
+```
+
+Recordar únicamente que se dice que existe multicolinealidad cuando los valores correspondientes de VIF (factor de inflación de varianza) para cada variable sea mayor que 5 (y en tal caso tendría que descartase la variable). Para nuestro caso no tenemos ese problema para ninguna variable.
+
